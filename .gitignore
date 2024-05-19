@@ -1,0 +1,11 @@
+.DS_Store
+
+# Ignore data
+*.mat
+*.csv
+*.plan
+
+# Ignore video files
+*.avi
+*.mp4
+*.mov

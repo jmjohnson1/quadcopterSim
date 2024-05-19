@@ -127,8 +127,7 @@ function [positionSp, velocitySp, flightVar] = GetSetpoints(t, s, traj,...
 			posRight = traj(1:3, tRight_idx);
 			velLeft = traj(4:6, tLeft_idx);
 			velRight = traj(4:6, tRight_idx);
-			% frac = (tLocal - timeLeft)/(timeRight - timeLeft);
-			frac = -(tLocal - timeLeft)/(timeRight - timeLeft);
+			frac = (tLocal - timeLeft)/(timeRight - timeLeft);
 
 			positionSp = posLeft + (posRight - posLeft)*frac;
 			velocitySp = velLeft + (velRight - velLeft)*frac;

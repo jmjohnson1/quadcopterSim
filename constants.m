@@ -98,10 +98,10 @@ const.Kp_pos = diag([ 8.0,  8.0, 29.0]);
 const.Ki_pos = diag([ 3.0,  3.0,  8.0]);
 const.Kd_pos = diag([12.0, 12.0, 16.0]);
 
-const.k_x = 12.8;
-const.k_v = 4.22;
+const.k_x = 13;
+const.k_v = 5.5;
 const.k_i = 1.28;
-const.k_R = 0.65*10;
+const.k_R = 1.5;
 const.k_w = 0.11;
 const.k_I = 0.06;
 const.c1 = 3.6;
@@ -114,4 +114,4 @@ const.maxPitchRoll = 30*deg2rad;
 
 % Limit on the integral term
 const.iMax_pos = 1;  % For position controller
-const.iMax_att = 50;  % For attitude controller
+const.iMax_att = 1;  % For attitude controller

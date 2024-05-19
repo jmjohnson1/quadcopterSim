@@ -13,22 +13,22 @@ classdef controller < handle
       % Update the DCM
       obj.C_ba = Quaternion2DCM(s(4:7));
       % Calculate desired roll, pitch, and thrust
-      [ref.roll, ref.pitch, ref.thrust] = positionPID(obj, s, [ref.position; ref.velocity*0], const, Ts);
+      % [ref.roll, ref.pitch, ref.thrust] = positionPID(obj, s, [ref.position; ref.velocity*0], const, Ts);
       % Perform the attitude PID. Passing in desired yaw rate of 0 for now
-      ref.yaw = 0;
-      [PIDOutput] = attitudePID(obj, s, [ref.roll; ref.pitch; ref.yaw], const, Ts);
+      % ref.yaw = 0;
+      % [PIDOutput] = attitudePID(obj, s, [ref.roll; ref.pitch; ref.yaw], const, Ts);
       % ref.thrust = -ref.thrust;
 
 
-			% b1d = [1; 1; 0];
-			% [ref.C_ba, ref.thrust] = positionPID2(obj, s, ref.position, ref.velocity, const, Ts, b1d);
+			b1d = [1; 0; 0];
+			[ref.C_ba, ref.thrust] = positionPID2(obj, s, ref.position, ref.velocity, const, Ts, b1d);
 			% ref.C_ba = Euler3212DCM([0; 60*pi/180; 0]);
-			% PIDOutput = attitudePID2(obj, s, ref.C_ba, const, Ts);
+			PIDOutput = attitudePID2(obj, s, ref.C_ba, const, Ts);
 			
-			% rpy = DCM2Euler321(ref.C_ba);
-			% ref.roll = rpy(1);
-			% ref.pitch = rpy(2);
-			% ref.yaw = rpy(3);
+			rpy = DCM2Euler321(ref.C_ba);
+			ref.roll = rpy(1);
+			ref.pitch = rpy(2);
+			ref.yaw = rpy(3);
 
 
       %%% Sine sweep %%%
