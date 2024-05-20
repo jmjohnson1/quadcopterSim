@@ -36,7 +36,7 @@ minW = const.minW;
 %%%%%%%%%%%%%%%%%%%%%%%%
 %  Initial conditions  %
 %%%%%%%%%%%%%%%%%%%%%%%%
-initPosition = [0, 0, 0]';  % initial position in local NED frame [m]
+initPosition = [15, 0, 0]';  % initial position in local NED frame [m]
 initVelocity = [0, 0, 0]';  % initial velocity in local NED frame [m/s]
 initAttitude = [0, 0, 0]'*deg2rad;  % initial roll, pitch, yaw [rad]
 initRates = [0, 0, 0]';  % Initial angular rates in body frame [rad/s]

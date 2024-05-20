@@ -99,7 +99,7 @@ const.Ki_pos = diag([ 3.0,  3.0,  8.0]);
 const.Kd_pos = diag([12.0, 12.0, 16.0]);
 
 const.k_x = 13;
-const.k_v = 5.5;
+const.k_v = 5.5*2;
 const.k_i = 1.28;
 const.k_R = 1.5;
 const.k_w = 0.11;

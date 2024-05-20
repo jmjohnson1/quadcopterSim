@@ -43,7 +43,7 @@ function [positionSp, velocitySp, flightVar] = GetSetpoints(t, s, traj,...
 		if flightVar.okToStartMission == false
 			% Need to navigate to the first mission waypoint
 			positionSp = traj(1:3, 1);
-			velocitySp = k*(positionSp - s(1:3));
+			velocitySp = k*(positionSp - s(1:3))*0;
 			
 			% Check if near first waypoint
 			if norm(positionSp - s(1:3)) < waypointArrivedThresh
