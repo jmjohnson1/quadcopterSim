@@ -3,7 +3,7 @@ function [positionSp, velocitySp, flightVar] = GetSetpoints(t, s, traj,...
 
 
 	takeoffAlt = 0.75;
-	k = 1;
+	k = 0;
 	waypointArrivedThresh = 0.05;
 
 	if doTakeoff == false && strcmp(flightVar.mode, 'takeoff')
@@ -78,6 +78,11 @@ function [positionSp, velocitySp, flightVar] = GetSetpoints(t, s, traj,...
 				
 				if doLanding==true
 					flightVar.mode = 'landing';
+          flightVar.landingFlag = true;
+			    flightVar.xSetpoint_LD = s(1);
+			    flightVar.ySetpoint_LD = s(2);
+          positionSp = [flightVar.xSetpoint_LD; flightVar.ySetpoint_LD; -0.1];
+		      velocitySp = [0; 0; 0];
 				end
 			else
 				% Interpolates between setpoints
@@ -91,8 +96,8 @@ function [positionSp, velocitySp, flightVar] = GetSetpoints(t, s, traj,...
 			flightVar.xSetpoint_LD = s(1);
 			flightVar.ySetpoint_LD = s(2);
 		end
-		positionSp = [flightVar.xSetpoint_LD; flightVar.ySetpoint_LD; 0];
-		velocitySp = [0; 0; -0.1];
+		positionSp = [flightVar.xSetpoint_LD; flightVar.ySetpoint_LD; -0.1];
+		velocitySp = [0; 0; 0];
 
 		% if abs(s(3)) < waypointArrivedThresh
 		% 	flightVar.waypointArrived = true;

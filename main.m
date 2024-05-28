@@ -38,7 +38,7 @@ minW = const.minW;
 %%%%%%%%%%%%%%%%%%%%%%%%
 initPosition = [0, 0, 0]';  % initial position in local NED frame [m]
 initVelocity = [0, 0, 0]';  % initial velocity in local NED frame [m/s]
-initAttitude = [0, 0, 0]'*deg2rad;  % initial roll, pitch, yaw [rad]
+initAttitude = [0, 0, 160]'*deg2rad;  % initial roll, pitch, yaw [rad]
 initRates = [0, 0, 0]';  % Initial angular rates in body frame [rad/s]
 hoverThrust = const.mB_ctrl*9.81/4*[1, 1, 1, 1]';
 initW = sqrt(hoverThrust./const.kt);  % Initial motor angular velocities [rad/s]
@@ -71,7 +71,10 @@ options = odeset('AbsTol',1e-11,'RelTol',1e-11); % Set integration tolerences
 % Initial state vector and memory allocation
 s0 = [initPosition; initq_bn; initVelocity; initRates; initW];
 s = zeros(length(s0), numPoints);
+sNoisy = zeros(13, numPoints);
 s(:, 1) = s0;
+% Noisy state vector used in the controller
+sNoisy(:, 1) = s0(1:13);
 sIndex = 1;  % This will track where we are in the sim
 tFc = zeros(1, numUpdates);  % Will be useful to have the times that correspond to flight controller updates
 setpoints.position = zeros(3, numUpdates);
@@ -88,7 +91,7 @@ for (LV1 = 1:numUpdates)
 
   % Controller update
   [sp.position, sp.velocity, flightVar] = GetSetpoints(tSim(sIndex), s(:, sIndex), traj, true, true, flightVar);
-  [rotRate, sp, pid] = ctrl.update(s(:, sIndex), sp, const, dt_flightControl);
+  [rotRate, sp, pid] = ctrl.update(sNoisy(:, sIndex), sp, const, dt_flightControl);
 
   % Save the setpoints for plotting later
 	pidOutput(:, LV1) = pid;
@@ -103,6 +106,12 @@ for (LV1 = 1:numUpdates)
   for (LV2 = 1:numSnapshots)
     [t_temp, s_temp] = ode45(@(t, s)ODEs(t, s, rotRate, const), [0, dt_sim], s(:, sIndex), options);
     s(:, sIndex + 1) = s_temp(end, :);
+    posNoisy = positionNoise(s(1:3, sIndex + 1));
+    velNoisy = velocityNoise(s(8:10, sIndex + 1));
+    qNoisy = quaternionNoise(s(4:7, sIndex + 1));
+    wNoisy = gyroNoise(s(11:13, sIndex + 1));
+    % sNoisy(:, sIndex + 1) = [posNoisy; qNoisy; velNoisy; wNoisy];
+    sNoisy(:, sIndex + 1) = s(1:13, sIndex + 1);
     sIndex = sIndex + 1;
 	end
 

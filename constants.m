@@ -33,14 +33,19 @@ const.mB_ctrl = 1.095;
 %             0, 0.00476, 0;
 %             0, 0, 0.00945];
 
-% 3s 3300 mAh
+if bat_3s_3300mAh == true
 const.Ib = [0.0059, 0, 0;
 					  0, 0.0042, 0;
 						0, 0, 0.0094];
+elseif bat_4s_5200mAh == true
+const.Ib = [6144384.31, 5120.80, 215538.86;
+            5120.80, 4616039.78, -645.56;
+            215538.86, -645.56, 9758320.53]*1e-9;
+end
 
 const.Ib_inv = inv(const.Ib);
-% Rotor moment of inertia about z. Approximated as disc
-const.Irzz = 7.27e-5;  
+% Rotor moment of inertia about z.
+const.Irzz = 1.5e-5;  
 
 % Motor constants
 % FIXME: These constants need updating
@@ -65,7 +70,6 @@ end
 
 
 % Motor dynamics (modeled as 1st order system)
-% FIXME: These need verification
 const.tauM = 0.015;  % Time constant [s]
 
 % Control mixer coefficient matrix
@@ -84,19 +88,19 @@ const.mixerCoefficientsInv = inv(const.mixerCoefficients);
 clear kt km dymf dymb dxmf dxmb;
 
 % Drag force (Not used, because ...)
-const.Cd = 0.5;  % Drag coefficient
+const.Cd = 0;  % Drag coefficient
 
 
 % Controller gains
 % Attitude
-const.Kp_att = diag([0.0290, 0.0290, 0.002]);
-const.Ki_att = diag([0.0084, 0.0084, 0.000]);
-const.Kd_att = diag([0.0060, 0.0060, 0.000]);
+const.Kp_att = diag([1.66, 1.66, 0.11]);
+const.Ki_att = diag([4.81, 4.81, 0.00]);
+const.Kd_att = diag([0.34, 0.34, 0.00]);
 
 % Position
-const.Kp_pos = diag([ 8.0,  8.0, 29.0]);
-const.Ki_pos = diag([ 3.0,  3.0,  8.0]);
-const.Kd_pos = diag([12.0, 12.0, 16.0]);
+const.Kp_pos = diag([5.0,  5.0,  8.0]);
+const.Ki_pos = diag([3.0,  3.0,  8.0]);
+const.Kd_pos = diag([8.0,  8.0, 16.0]);
 
 const.k_x = 13;
 const.k_v = 5.5;
@@ -114,4 +118,4 @@ const.maxPitchRoll = 30*deg2rad;
 
 % Limit on the integral term
 const.iMax_pos = 1;  % For position controller
-const.iMax_att = 1;  % For attitude controller
+const.iMax_att = 50;  % For attitude controller

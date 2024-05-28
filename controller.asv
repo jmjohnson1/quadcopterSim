@@ -129,7 +129,17 @@ classdef controller < handle
 			f = (k_x*e_x + k_v*e_v + k_i*e_i_sat+ m*g*[0;0;1])'*obj.C_ba'*[0;0;1];
 			obj.integralPrev_position = e_i_sat;
     end
-    
+
+    function motorCmdNorm = oldMixer(obj, t_hat, mx_hat, my_hat, mz_hat)
+      motorCmdNorm = zeros(4, 1);
+      motorCmdNorm(1) = t_hat + mx_hat + my_hat - mz_hat;
+      motorCmdNorm(2) = t_hat - mx_hat + my_hat + mz_hat;
+      motorCmdNorm(3) = t_hat - mx_hat - my_hat - mz_hat;
+      motorCmdNorm(4) = t_hat + mx_hat - my_hat + mz_hat;
+
+      motorCmdNorm = constrain(motorCmdNorm, 0, 1);
+    end
+
 		function angularRates = ControlAllocator(obj, u, const)
 			angularRates = real(sqrt(const.mixerCoefficientsInv*u));
 		end
