@@ -116,6 +116,8 @@ classdef controller < handle
 			g = const.g;
 			% Position and velocity errors
 			e_x = s(1:3) - xd;
+      % This is a quick fix for constraining velocity/attitude. Not a good fix.
+      e_x = constrain(e_x, -2, 2);
 			e_v = s(8:10) - vd;
 			% Integral term (euler integration)
 			e_i = obj.integralPrev_position + (e_v + const.c1*e_x)*Ts;
