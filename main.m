@@ -1,9 +1,9 @@
 clear; close all; clc;
 % Add the helper functions to the Matlab search path
 addpath('./helperFunctions/');
+addpath('./EKF/');
 
-% profile on;
-
+try
 constants;
 
 % Trajectory type
@@ -16,11 +16,11 @@ constants;
 
 trajType = 'minsnap';
 t_wp = linspace(0, 10, 5);
-waypoints = [0, 0, -0.75;
-						 -1, 0, -0.75;
-						 -1, 1, -0.75;
-						 0, 1, -0.75;
-						 0, 0, -0.75]';
+waypoints = [ 0.00,  0.00,  -0.75;
+						 -1.00,  0.00,  -0.75;
+						 -1.00,  1.00,  -1.50;
+						  0.00,  1.00,  -1.00;
+						  0.00,  0.00,  -0.75]';
 waypoints = [waypoints; t_wp];
 traj = GenerateTrajectory(waypoints, trajType, false); % Import trajectory
 
@@ -36,7 +36,7 @@ minW = const.minW;
 %%%%%%%%%%%%%%%%%%%%%%%%
 %  Initial conditions  %
 %%%%%%%%%%%%%%%%%%%%%%%%
-initPosition = [15, 0, 0]';  % initial position in local NED frame [m]
+initPosition = [0, 0, 0]';  % initial position in local NED frame [m]
 initVelocity = [0, 0, 0]';  % initial velocity in local NED frame [m/s]
 initAttitude = [0, 0, 160]'*deg2rad;  % initial roll, pitch, yaw [rad]
 initRates = [0, 0, 0]';  % Initial angular rates in body frame [rad/s]
@@ -48,7 +48,7 @@ initWdot = [0, 0, 0, 0]';  % Initial motor angular acceleration [rad/s^2]
 tStart = 0;  % Simulation end time [sec]
 tEnd = 30;  % Simulation start time [sec]
 looprateFC = 250;  % Flight controller loop rate [Hz]
-numSnapshots = 1;  % Number of states to save between each FC update
+numSnapshots = 2;  % Number of states to save between each FC update
 
 initC_bn = Euler3212DCM(initAttitude);
 initq_bn = DCM2Quaternion(initC_bn);  % Scalar first
@@ -73,7 +73,8 @@ s0 = [initPosition; initq_bn; initVelocity; initRates; initW];
 s = zeros(length(s0), numPoints);
 sNoisy = zeros(13, numPoints);
 s(:, 1) = s0;
-% Noisy state vector used in the controller
+% State estimates from the EKF
+ekfState = [initPosition; initVelocity; zeros(9, 1)];
 sNoisy(:, 1) = s0(1:13);
 sIndex = 1;  % This will track where we are in the sim
 tFc = zeros(1, numUpdates);  % Will be useful to have the times that correspond to flight controller updates
@@ -91,7 +92,7 @@ for (LV1 = 1:numUpdates)
 
   % Controller update
   [sp.position, sp.velocity, flightVar] = GetSetpoints(tSim(sIndex), s(:, sIndex), traj, true, true, flightVar);
-  [rotRate, sp, pid] = ctrl.update(sNoisy(:, sIndex), sp, const, dt_flightControl);
+  [rotRate, sp, pid] = ctrl.update(s(:, sIndex), sp, const, dt_flightControl);
 
   % Save the setpoints for plotting later
 	pidOutput(:, LV1) = pid;
@@ -106,12 +107,24 @@ for (LV1 = 1:numUpdates)
   for (LV2 = 1:numSnapshots)
     [t_temp, s_temp] = ode45(@(t, s)ODEs(t, s, rotRate, const), [0, dt_sim], s(:, sIndex), options);
     s(:, sIndex + 1) = s_temp(end, :);
-    posNoisy = positionNoise(s(1:3, sIndex + 1));
-    velNoisy = velocityNoise(s(8:10, sIndex + 1));
-    qNoisy = quaternionNoise(s(4:7, sIndex + 1));
-    wNoisy = gyroNoise(s(11:13, sIndex + 1));
-    % sNoisy(:, sIndex + 1) = [posNoisy; qNoisy; velNoisy; wNoisy];
-    sNoisy(:, sIndex + 1) = s(1:13, sIndex + 1);
+    
+    ds = ODEs(0, s(:, sIndex), rotRate, const);
+    accelMeas = Quaternion2DCM(s(4:7, sIndex))*(ds(8:10) - [0;0;const.g]) + randn(3,1).*const.sigma_acc;
+    gyroMeas = s(11:13, sIndex) + randn(3,1).*const.sigma_gyro;
+
+    % X, Y, u, P, constants, Ts, quat
+    if (mod(LV1+LV2, 100) == 0)
+      Y = s(1:3, sIndex+1);
+    else
+      Y = [];
+    end
+    [ekfState, P, qEst] = EKF(ekfState, Y, [accelMeas; gyroMeas], P, const, dt_sim, sNoisy(4:7, sIndex));
+
+    aBias(:, sIndex + 1) = ekfState(10:12);
+    gBias(:, sIndex + 1) = ekfState(13:15);
+    P_save(:, :, sIndex + 1) = P;
+
+    sNoisy(:, sIndex + 1) = [ekfState(1:3); qEst; ekfState(4:6); gyroMeas];
     sIndex = sIndex + 1;
 	end
 
@@ -123,10 +136,14 @@ delete(wb);
 disp("Post processing...")
 postprocessing;
 
-% profile off
-% profview
-
 disp("Plotting...")
 plotscript;
 
 save simData;
+
+catch ME
+  if exist('wb')
+  delete(wb)
+  end
+  rethrow(ME)
+end

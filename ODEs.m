@@ -113,8 +113,6 @@ function  [dot_x] = ODEs(t, s, u, const)
                  (-IBxx*p*r + IBzz*p*r + IRzz*(wM(1) - wM(2) + wM(3) - wM(4))*p + thrM1*dxmf + thrM2*dxmf - thrM3*dxmb - thrM4*dxmb - 0.5)/IByy;
                  (IBxx*p*q - IByy*p*q - TorM1 + TorM2 - TorM3 + TorM4)/IBzz];
 
-
-  % dot_x = [dot_x_quad; wdotM; wddotM];
 	dot_x = [dot_x_quad; wdotM];
 
 

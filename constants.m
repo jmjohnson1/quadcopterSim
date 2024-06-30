@@ -119,3 +119,40 @@ const.maxPitchRoll = 30*deg2rad;
 % Limit on the integral term
 const.iMax_pos = 1;  % For position controller
 const.iMax_att = 50;  % For attitude controller
+
+
+
+%-------------------------------------------------------------------------
+%  EKF
+%-------------------------------------------------------------------------
+N = 15;
+const.tau_a = [1000 1000 1000]';
+const.tau_g = [1000 1000 1000]'; 
+const.acc_bias_driving_noise = 1e-4*[1 1 1]';
+const.gyro_bias_driving_noise = 1e-4*[1 1 1]';
+const.sigma_acc = 1e-3*[1 1 1]';
+const.sigma_gyro = 1e-3*[1 1 1]';
+const.sigma_pos = 1e-4*[1 1 1]';  % measurement noise
+const.sigma_initial_pos = 0.2*ones(3,1);
+const.sigma_initial_vel = 0.2*ones(3,1);
+const.sigma_initial_att = ([pi/60 pi/60 pi/60]');
+const.sigma_initial_acc_bias = 0.1*ones(3,1); 
+const.sigma_initial_gyro_bias = 0.1*ones(3,1);
+
+P = zeros(N,N);
+const.Q = zeros(12,12);
+P(1:3,1:3) = diag( const.sigma_initial_pos.^2 );
+P(4:6,4:6) = diag( const.sigma_initial_vel.^2 );
+P(7:9,7:9) = diag( const.sigma_initial_att.^2 );
+P(10:12,10:12) = diag(const.sigma_initial_acc_bias.^2);
+P(13:15,13:15) = diag(const.sigma_initial_gyro_bias.^2);
+
+const.Q(1:3,1:3) = diag( const.sigma_acc.^2 );
+const.Q(4:6,4:6) = diag( const.sigma_gyro.^2 );
+const.Q(7:9,7:9) = diag( 2*const.acc_bias_driving_noise.^2./const.tau_a );
+const.Q(10:12,10:12) = diag( 2*const.gyro_bias_driving_noise.^2./const.tau_g );
+
+const.H = zeros(3, N);
+const.H(1:3,1:3) = eye(3);
+
+const.R = diag( const.sigma_pos.^2 );

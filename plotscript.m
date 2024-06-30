@@ -10,16 +10,19 @@ axPos(1) = subplot(311);
   plot(tSim, position(1, :));
   hold on;
   plot(tFc, setpoints.position(1, :));
+  plot(tSim, sNoisy(1, :));
   hold off;
   ylabel("x (m)")
 axPos(2) = subplot(312);
   plot(tSim, position(2, :))
   hold on;
   plot(tFc, setpoints.position(2, :));
+  plot(tSim, sNoisy(2, :));
   hold off;
   ylabel("y (m)")
 axPos(3) = subplot(313);
   plot(tSim, position(3, :))
+  plot(tSim, sNoisy(3, :));
   hold on;
   plot(tFc, setpoints.position(3, :));
   hold off;
@@ -37,6 +40,7 @@ axVel(i) = subplot(3, 1, i);
 	plot(tSim, s(i+7, :));
 	hold on
 	plot(tFc, setpoints.velocity(i, :));
+  plot(tSim, sNoisy(i+7, :));
 	hold off;
 	ylabel(labels(i));
 	grid on
@@ -50,10 +54,11 @@ labels = ["Roll (deg)", "Pitch (deg)", "Yaw (deg)"];
 for i = 1:3
 	axAtt(i) = subplot(3, 1, i);
   	plot(tSim, eulerAngles(i, :));
-  	hold on;
+  	hold on; 
 		if i ~= 3
 			plot(tFc, setpoints.euler(i, :));
-		end
+    end
+    plot(tSim, eulerAnglesEst(i, :));
   	hold off;
   	ylabel(labels(i))
 end
