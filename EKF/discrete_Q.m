@@ -1,4 +1,4 @@
-              function Q = discrete_Q(F,G,dt,Qc)
+function Q = discrete_Q(F,G,dt,Qc)
 
 %=========================================================================%
 %               Q = = discrete_Q(F,G,dt,Qc)
