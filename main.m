@@ -24,6 +24,16 @@ waypoints = [ 0.00,  0.00,  -0.75;
 waypoints = [waypoints; t_wp];
 traj = GenerateTrajectory(waypoints, trajType, false); % Import trajectory
 
+% checking the speed
+speedMAT = zeros(1,size(waypoints, 2));
+for elm = 2:size(waypoints,2)
+    speedMAT(elm-1) = (sqrt(sum( (waypoints(1:3,elm) - waypoints(1:3,elm-1)).^2 ))) / t_wp(2);
+end
+
+if (any(speedMAT > 0.5))
+    error("Trajectory is too fast, add more time or shorten distance between points");
+end
+
 flightVar.mode = 'takeoff';
 flightVar.takeoffFlag = false;
 flightVar.landingFlag = false;
