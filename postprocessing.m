@@ -8,9 +8,9 @@ eulerAngles = zeros(3, numPoints);
 eulerAnglesEst = eulerAngles;
 setpoints.euler = setpoints.euler*180/pi;
 
-for (LV1 = 1:numPoints)
+for LV1 = 1:numPoints
   C_bn = Quaternion2DCM(s(4:7, LV1));
-  C_bnEst = Quaternion2DCM(sNoisy(4:7, LV1));
+  C_bnEst = Quaternion2DCM(sEstimate(4:7, LV1));
   eulerAngles(:, LV1) = DCM2Euler321(C_bn)*rad2deg;
   eulerAnglesEst(:, LV1) = DCM2Euler321(C_bnEst)*rad2deg;
 	thrust(LV1) = sum(const.kt*motorRotRate(:, LV1).^2);

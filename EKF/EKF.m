@@ -14,14 +14,14 @@ u = u - X(10:15);
 [Fc, Gc] = state_matrix1(quat, u, Ts, constants);
 
 % discretize Fc and Gc
-F = expm(Fc*Ts);
-Q_k = discrete_Q(Fc,Gc,Ts,Q);
-% F = eye(15) + Ts*Fc;
-% Q_k = F*Ts*Gc*Q*Gc';
-% Q_k = (Q_k+Q_k')/2;
+% F = expm(Fc*Ts);
+% Q_k = discrete_Q(Fc,Gc,Ts,Q);
+F = eye(15) + Ts*Fc;
+Q_k = F*Ts*Gc*Q*Gc';
+Q_k = (Q_k+Q_k')/2;
 
 % update the filter state covariance matrix
-P = F*P*F'+ Q_k;  
+P = F*P*F'+ Q_k;
 P = (P+P')/2;     % Forces symmetry
 
 if ~isempty(Y)

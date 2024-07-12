@@ -16,6 +16,10 @@ dq = [1; 0.5*w1t; 0.5*w2t; 0.5*w3t];
 q = quatmultiply(q', dq')';
 q = q./norm(q);
 
+if (q(1) < 0) 
+  q = -q;
+end
+
 % DCM from NED to body frame
 C_bn = Quaternion2DCM(q);
 C_nb = C_bn';
