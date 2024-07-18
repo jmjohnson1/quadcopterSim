@@ -1,2 +1,0 @@
-function imuOutput = imuMeas()
-end

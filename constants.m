@@ -130,14 +130,14 @@ N = 15;
 
 % Accel/gyro model values
 % GM time constant
-const.tau_a = [1000 1000 1000]';
-const.tau_g = [1000 1000 1000]'; 
+const.tau_a = 3*[300 300 300]';
+const.tau_g = 3*[200 200 200]'; 
 % GM sigma
-const.acc_bias_driving_noise = 1e-4*[1 1 1]';
-const.gyro_bias_driving_noise = 1e-4*[1 1 1]';
+const.sigma_acc_gm = [3.993E-3 5.243E-3 4.660E-3]';
+const.sigma_gyro_gm = [2.56E-4 3.76E-4 1.40E-4]';
 % White noise
-const.sigma_acc = 1e-3*[1 1 1]';
-const.sigma_gyro = 1e-3*[1 1 1]';
+const.sigma_acc = [0.048 0.048 0.063]';
+const.sigma_gyro = [0.0025 0.0025 0.0015]';
 
 % Inital conditions
 const.sigma_initial_pos = 0.2*ones(3,1);
@@ -158,13 +158,13 @@ P(13:15,13:15) = diag(const.sigma_initial_gyro_bias.^2);
 const.Q = zeros(12,12);
 const.Q(1:3,1:3) = diag( const.sigma_acc.^2 );
 const.Q(4:6,4:6) = diag( const.sigma_gyro.^2 );
-const.Q(7:9,7:9) = diag( 2*const.acc_bias_driving_noise.^2./const.tau_a );
-const.Q(10:12,10:12) = diag( 2*const.gyro_bias_driving_noise.^2./const.tau_g );
+const.Q(7:9,7:9) = diag( 2*const.sigma_acc_gm.^2./const.tau_a );
+const.Q(10:12,10:12) = diag( 2*const.sigma_gyro_gm.^2./const.tau_g );
 
 % State to measurement
 const.H = zeros(3, N);
 const.H(1:3,1:3) = eye(3);
 
 % Measurement noise covariance
-const.sigma_pos = 1e-4*[1 1 1]';
+const.sigma_pos = [0.02 0.02 0.02]';
 const.R = diag( const.sigma_pos.^2 );
