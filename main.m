@@ -8,7 +8,16 @@ addpath('./EKF/');
 %%%%%%%%%%%
 opt.useEKF = false;
 opt.makePlots = true;
+opt.debugEKFFiles = true;
 
+% Time options
+tStart = 0;  % Simulation end time [sec]
+tEnd = 30;  % Simulation start time [sec]
+looprateFC = 250;  % Flight controller loop rate [Hz]
+numSnapshots = 1;  % Number of states to save between each FC update
+
+% Define how often measurements are passed into the EKF
+measUpdateRate = 1;  % Hz
 
 %%%%%%%%%%%%%%%%%%%%%
 % Trajectory Import %
@@ -43,15 +52,9 @@ waypoints = [ 0.00,  0.00,  -0.75;
 waypoints = [waypoints; t_wp];
 traj = GenerateTrajectory(waypoints, trajType, false); % Import trajectory
 
-
-
-
 try
   constants;
   minW = const.minW;
-
-  % Set this true in order to use state estimation based on simulated sensors
-  useEKF = true;
 
   %%%%%%%%%%%%%%%%%%%%%%%%%%%
   % Flight status variables %
@@ -72,20 +75,19 @@ try
   initVelocity = [0, 0, 0]';  % initial velocity in local NED frame [m/s]
   initAttitude = [0, 0, 160]'*deg2rad;  % initial roll, pitch, yaw [rad]
   initRates = [0, 0, 0]';  % Initial angular rates in body frame [rad/s]
+
+  % Initial motor rates
   hoverThrust = const.mB_ctrl*9.81/4*[1, 1, 1, 1]';
   initW = sqrt(hoverThrust./const.kt);  % Initial motor angular velocities [rad/s]
   initWdot = [0, 0, 0, 0]';  % Initial motor angular acceleration [rad/s^2]
-
-  % Time options
-  tStart = 0;  % Simulation end time [sec]
-  tEnd = 30;  % Simulation start time [sec]
-  looprateFC = 250;  % Flight controller loop rate [Hz]
-  numSnapshots = 1;  % Number of states to save between each FC update
 
   % Initial DCM and quaternion
   initC_bn = Euler3212DCM(initAttitude);
   initq_bn = DCM2Quaternion(initC_bn);  % Scalar first
 
+  %%%%%%%%%%%%%%%%%
+  % Sim variables %
+  %%%%%%%%%%%%%%%%%
   % Figure out time steps and the sizes of matrices that need to be initialized
   dt_flightControl = 1/looprateFC;  % Flight controller time step [sec]
   numUpdates = floor((tEnd - tStart)/dt_flightControl) + 1;
@@ -97,17 +99,6 @@ try
   gyroTriad = memsIMU(const.tau_g, const.sigma_gyro, const.sigma_gyro_gm);
   accelTriad = memsIMU(const.tau_a, const.sigma_acc, const.sigma_acc_gm);
 
-  % Define how often measurements are passed into the EKF
-  measUpdateRate = 1;  % Hz
-  measUpdatePrev = 0;
-
-  disp("Simulation starting...");
-  tic;
-
-
-  %%%%%%%%%%%%%%%%
-  %  Simulation  %
-  %%%%%%%%%%%%%%%%
   ctrl = controller; % Create controller object
   options = odeset('AbsTol',1e-11,'RelTol',1e-11); % Set integration tolerences
 
@@ -120,6 +111,7 @@ try
   ekfState = [initPosition; initVelocity; zeros(9, 1)];
   sEstimate = zeros(13, numPoints);
   sEstimate(:, 1) = s0(1:13);
+  measUpdatePrev = 0;
 
   % This will track where to access and save states in the sim
   sIndex = 1;  
@@ -134,10 +126,17 @@ try
   setpoints.rotRate = zeros(4, numUpdates);
   setpoints.thrust = zeros(1, numUpdates);
 
-
   % DEBUG: To pass into the C++ version of the EKF
-  outputData = zeros(numPoints, 17);
-  tow = 0;
+  if opt.debugEKFFiles == true
+    outputData = zeros(numPoints, 17);
+    updateCounter = 0;
+  end
+
+  disp("Simulation starting...");
+  tic;
+  %%%%%%%%%%%%%%%%
+  %  Simulation  %
+  %%%%%%%%%%%%%%%%
 
   % Waitbar for displaying simulation progress. There are occasions where this window will stay open
   % after the program fails to exit cleanly. It can only be closed using this command:
@@ -168,7 +167,7 @@ try
       [t_temp, s_temp] = ode45(@(t, s)ODEs(t, s, rotRate, const), [0, dt_sim], s(:, sIndex), options);
       s(:, sIndex + 1) = s_temp(end, :);
       
-      if useEKF == true
+      if opt.useEKF == true
         % For generating sensor measurements, calculate the state derivative at the current time
         ds = ODEs(0, s(:, sIndex), rotRate, const);
         % Take the acceleration, put it in the body frame, add gravity, add noise
@@ -218,8 +217,10 @@ try
   postprocessing;
 
 
-  disp("Plotting...")
-  plotscript;
+  if opt.makePlots == true
+    disp("Plotting...")
+    plotscript;
+  end
 
   save simData;
 
