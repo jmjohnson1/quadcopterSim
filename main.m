@@ -44,7 +44,7 @@ try
   minW = const.minW;
 
   % Set this true in order to use state estimation based on simulated sensors
-  useEKF = true;
+  useEKF = false;
 
   %%%%%%%%%%%%%%%%%%%%%%%%%%%
   % Flight status variables %
