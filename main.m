@@ -3,6 +3,13 @@ clear; close all; clc;
 addpath('./helperFunctions/');
 addpath('./EKF/');
 
+%%%%%%%%%%%
+% Options %
+%%%%%%%%%%%
+opt.useEKF = false;
+opt.makePlots = true;
+
+
 %%%%%%%%%%%%%%%%%%%%%
 % Trajectory Import %
 %%%%%%%%%%%%%%%%%%%%%
@@ -18,13 +25,13 @@ addpath('./EKF/');
 % (u, v, w) are the velocities to target while passing through the waypoint (NED) [m/s].
 % t is the time when the quad should be passing through the waypoint [seconds]
 
-% Trajectory type
-% trajType = 'testAttitudeStabilize';
-% trajType = 'testStepX';
-% trajType = 'testStepY';
-% trajType = 'testStepZ';
-% trajType = 'testStep';
-% waypoints = [];
+  % Trajectory type
+  % trajType = 'testAttitudeStabilize';
+  % trajType = 'testStepX';
+  % trajType = 'testStepY';
+  % trajType = 'testStepZ';
+  % trajType = 'testStep';
+  % waypoints = [];
 
 trajType = 'minsnap';
 t_wp = linspace(0, 5, 5);
