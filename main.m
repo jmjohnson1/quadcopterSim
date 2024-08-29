@@ -6,9 +6,9 @@ addpath('./EKF/');
 %%%%%%%%%%%
 % Options %
 %%%%%%%%%%%
-opt.useEKF = false;
+opt.useEKF = true;
 opt.makePlots = true;
-opt.debugEKFFiles = true;
+opt.debugEKFFiles = false;
 
 % Time options
 tStart = 0;  % Simulation end time [sec]
@@ -152,8 +152,8 @@ try
     end
 
     % Controller update
-    [sp.position, sp.velocity, flightVar] = GetSetpoints(tSim(sIndex), s(:, sIndex), traj, true, true, flightVar);
-    [rotRate, sp, pid] = ctrl.update(s(:, sIndex), sp, const, dt_flightControl);
+    [sp.position, sp.velocity, flightVar] = GetSetpoints(tSim(sIndex), sEstimate(:, sIndex), traj, true, true, flightVar);
+    [rotRate, sp, pid] = ctrl.update(sEstimate(:, sIndex), sp, const, dt_flightControl);
 
     % Save the setpoints for plotting later
     setpoints.position(:, LV1) = sp.position;
@@ -180,16 +180,16 @@ try
 
         % Determine availability of position measurement
         if tSim(sIndex) - measUpdatePrev > 1/measUpdateRate
-          Y = s(1:3, sIndex+1) + const.sigma_pos.*randn(3, 1)/2;
+          Y = s(1:3, sIndex+1) + const.sigma_pos.*randn(3, 1)/100;
           measUpdatePrev = tSim(sIndex);
 
           % DEBUG: To pass into the C++ version of the EKF
-          tow = tow + 1;
-          outputData(sIndex, :) = [tSim(sIndex)*1e6, [accelMeas', gyroMeas'], Y', tow, s(1:3, sIndex+1)', DCM2Euler321(Quaternion2DCM(s(4:7, sIndex+1)))'];
+          % tow = tow + 1;
+          % outputData(sIndex, :) = [tSim(sIndex)*1e6, [accelMeas', gyroMeas'], Y', tow, s(1:3, sIndex+1)', DCM2Euler321(Quaternion2DCM(s(4:7, sIndex+1)))'];
         else
           Y = [];
           % DEBUG: To pass into the C++ version of the EKF
-          outputData(sIndex, :) = [tSim(sIndex)*1e6, [accelMeas', gyroMeas'], [0, 0, 0], tow, s(1:3, sIndex+1)', DCM2Euler321(Quaternion2DCM(s(4:7, sIndex+1)))'];
+          % outputData(sIndex, :) = [tSim(sIndex)*1e6, [accelMeas', gyroMeas'], [0, 0, 0], tow, s(1:3, sIndex+1)', DCM2Euler321(Quaternion2DCM(s(4:7, sIndex+1)))'];
         end
         
         % Run the EKF to get an estimated state
@@ -208,11 +208,11 @@ try
   delete(wb);
 
   % DEBUG: To pass into the C++ version of the EKF
-  writematrix(outputData, "flightData.csv");
-  mocapPosition_i = s(1:3, :)';
-  q_i = s(4:7, :)';
-  time = tSim;
-  save("mocapData", "mocapPosition_i", "q_i", "time");
+  % writematrix(outputData, "flightData.csv");
+  % mocapPosition_i = s(1:3, :)';
+  % q_i = s(4:7, :)';
+  % time = tSim;
+  % save("mocapData", "mocapPosition_i", "q_i", "time");
 
   disp("Post processing...")
   postprocessing;

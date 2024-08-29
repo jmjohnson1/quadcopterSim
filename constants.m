@@ -136,10 +136,10 @@ N = 15;
 const.tau_a = 3*[300 300 300]';
 const.tau_g = 3*[200 200 200]'; 
 % GM sigma
-const.sigma_acc_gm = [3.993E-3 5.243E-3 4.660E-3]';
-const.sigma_gyro_gm = [2.56E-4 3.76E-4 1.40E-4]';
+const.sigma_acc_gm = [5E-3 5E-3 5E-3]';
+const.sigma_gyro_gm = [1E-4 1E-4 1E-4]';
 % White noise
-const.sigma_acc = [0.048 0.048 0.063]';
+const.sigma_acc = [0.01 0.01 0.01]';
 const.sigma_gyro = [0.0025 0.0025 0.0015]';
 
 % Inital conditions
