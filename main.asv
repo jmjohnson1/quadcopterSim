@@ -42,14 +42,14 @@ opt.makePlots = true;
 % waypoints = [waypoints; t_wp];
 % traj = GenerateTrajectory(waypoints, trajType, false); % Import trajectory
 
-traj = MakeStep([-0.5 -1.0 -1.5 -1.0], [0 6 12 18]);
+traj = MakeStep([-0.5 -1.0 -1.5 -1.0], [0 6 12 18]))
 
 try
   constants;
   minW = const.minW;
 
   % Set this true in order to use state estimation based on simulated sensors
-  useEKF = true;
+  useEKF = false;
 
   %%%%%%%%%%%%%%%%%%%%%%%%%%%
   % Flight status variables %
