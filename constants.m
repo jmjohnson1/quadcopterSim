@@ -93,14 +93,17 @@ const.Cd = 0;  % Drag coefficient
 
 % Controller gains
 % Attitude
-const.Kp_att = diag([1.66, 1.66, 0.11]);
-const.Ki_att = diag([4.81, 4.81, 0.00]);
-const.Kd_att = diag([0.34, 0.34, 0.00]);
+% const.Kp_att = diag([1.66, 1.66, 0.11]);
+% const.Ki_att = diag([4.81, 4.81, 0.00]);
+% const.Kd_att = diag([0.34, 0.34, 0.00]);
+const.Kp_att = diag([1.6, 1.7, 0.12]);
+const.Ki_att = diag([2.4, 2.3, 0.02]);
+const.Kd_att = diag([0.28, 0.28, 0.1]);
 
 % Position
-const.Kp_pos = diag([5.0,  5.0,  8.0]);
-const.Ki_pos = diag([3.0,  3.0,  8.0]);
-const.Kd_pos = diag([8.0,  8.0, 16.0]);
+const.Kp_pos = diag([9.88,  9.88,  11.34]);
+const.Ki_pos = diag([0.3,  0.3,  2.93]);
+const.Kd_pos = diag([11.85,  11.85, 16.29]);
 
 const.k_x = 13;
 const.k_v = 5.5*2;

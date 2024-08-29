@@ -16,7 +16,7 @@ classdef controller < handle
       % Calculate desired roll, pitch, and thrust
       [ref.roll, ref.pitch, ref.thrust] = positionPID(obj, s, [ref.position; ref.velocity], const, Ts);
       % Perform the attitude PID. Passing in desired yaw rate of 0 for now
-      ref.yaw = pi;
+      ref.yaw = 0;
       [PIDOutput] = attitudePID(obj, s, [ref.roll; ref.pitch; ref.yaw], const, Ts);
 
 			% b1d = [1; 0; 0];
@@ -37,17 +37,12 @@ classdef controller < handle
       error = attDes - attEuler;
       w = s(11:13);
       % error(3) = attDes(3) - w(3);
-
+      
       % Handle wrapping
-      if error(3) <= -pi
-        error(3) = error(3) + 2*pi;
-      elseif error(3) > pi
-        error(3) = error(3) - 2*pi;
-      end
+      if error(3)
 
       derivative(1:2, 1) = -w(1:2);  % Approximation of the derivative term for pitch and roll. Assumes small changes in reference and prevents kick.
-      % derivative(3, 1) = (error(3) - obj.errorPrev_attitude(3))/Ts;  % Simple approximation of yaw rate derivative
-      derivative(3, 1) = -w(3);
+      derivative(3, 1) = (error(3) - obj.errorPrev_attitude(3))/Ts;  % Simple approximation of yaw rate derivative
       integral = obj.integralPrev_attitude + error*Ts;
       % Prevent integral buildup
       integral = constrain(integral, -const.iMax_att, const.iMax_att);
