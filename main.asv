@@ -6,18 +6,9 @@ addpath('./EKF/');
 %%%%%%%%%%%
 % Options %
 %%%%%%%%%%%
-opt.useEKF = true;
+opt.useEKF = false;
 opt.makePlots = true;
-opt.debugEKFFiles = false;
 
-% Time options
-tStart = 0;  % Simulation end time [sec]
-tEnd = 30;  % Simulation start time [sec]
-looprateFC = 100;  % Flight controller loop rate [Hz]
-numSnapshots = 2;  % Number of states to save between each FC update
-
-% Define how often measurements are passed into the EKF
-measUpdateRate = 5;  % Hz
 
 %%%%%%%%%%%%%%%%%%%%%
 % Trajectory Import %
@@ -51,11 +42,14 @@ measUpdateRate = 5;  % Hz
 % waypoints = [waypoints; t_wp];
 % traj = GenerateTrajectory(waypoints, trajType, false); % Import trajectory
 
-traj = MakeStep([-0.5 -1.0 -1.5 -1.0], [0 6 12 18]);
+traj = MakeStep([-0.5 -1.0 -1.5 -1.0], [0 6 12 18]))
 
 try
   constants;
   minW = const.minW;
+
+  % Set this true in order to use state estimation based on simulated sensors
+  useEKF = false;
 
   %%%%%%%%%%%%%%%%%%%%%%%%%%%
   % Flight status variables %
@@ -76,19 +70,20 @@ try
   initVelocity = [0, 0, 0]';  % initial velocity in local NED frame [m/s]
   initAttitude = [0, 0, 160]'*deg2rad;  % initial roll, pitch, yaw [rad]
   initRates = [0, 0, 0]';  % Initial angular rates in body frame [rad/s]
-
-  % Initial motor rates
   hoverThrust = const.mB_ctrl*9.81/4*[1, 1, 1, 1]';
   initW = sqrt(hoverThrust./const.kt);  % Initial motor angular velocities [rad/s]
   initWdot = [0, 0, 0, 0]';  % Initial motor angular acceleration [rad/s^2]
+
+  % Time options
+  tStart = 0;  % Simulation end time [sec]
+  tEnd = 30;  % Simulation start time [sec]
+  looprateFC = 250;  % Flight controller loop rate [Hz]
+  numSnapshots = 1;  % Number of states to save between each FC update
 
   % Initial DCM and quaternion
   initC_bn = Euler3212DCM(initAttitude);
   initq_bn = DCM2Quaternion(initC_bn);  % Scalar first
 
-  %%%%%%%%%%%%%%%%%
-  % Sim variables %
-  %%%%%%%%%%%%%%%%%
   % Figure out time steps and the sizes of matrices that need to be initialized
   dt_flightControl = 1/looprateFC;  % Flight controller time step [sec]
   numUpdates = floor((tEnd - tStart)/dt_flightControl) + 1;
@@ -99,15 +94,18 @@ try
   % Initialize accelerometer and gyro objects
   gyroTriad = memsIMU(const.tau_g, const.sigma_gyro, const.sigma_gyro_gm);
   accelTriad = memsIMU(const.tau_a, const.sigma_acc, const.sigma_acc_gm);
-	accelTruth = zeros(3, numPoints);
-	gyroTruth = zeros(3, numPoints);
-	accelMeas = zeros(3, numPoints);
-	gyroMeas = zeros(3, numPoints);
-	accelBiasEstimate = zeros(3, numPoints);
-	gyroBiasEstimate = zeros(3, numPoints);
-	accelBiasTruth = zeros(3, numPoints);
-	gyroBiasTruth = zeros(3, numPoints);
 
+  % Define how often measurements are passed into the EKF
+  measUpdateRate = 1;  % Hz
+  measUpdatePrev = 0;
+
+  disp("Simulation starting...");
+  tic;
+
+
+  %%%%%%%%%%%%%%%%
+  %  Simulation  %
+  %%%%%%%%%%%%%%%%
   ctrl = controller; % Create controller object
   options = odeset('AbsTol',1e-11,'RelTol',1e-11); % Set integration tolerences
 
@@ -120,9 +118,6 @@ try
   ekfState = [initPosition; initVelocity; zeros(9, 1)];
   sEstimate = zeros(13, numPoints);
   sEstimate(:, 1) = s0(1:13);
-  measUpdatePrev = 0;
-
-  windVel = randn(numPoints, 1)*3;
 
   % This will track where to access and save states in the sim
   sIndex = 1;  
@@ -137,17 +132,10 @@ try
   setpoints.rotRate = zeros(4, numUpdates);
   setpoints.thrust = zeros(1, numUpdates);
 
-  % DEBUG: To pass into the C++ version of the EKF
-  if opt.debugEKFFiles == true
-    outputData = zeros(numPoints, 17);
-    updateCounter = 0;
-  end
 
-  disp("Simulation starting...");
-  tic;
-  %%%%%%%%%%%%%%%%
-  %  Simulation  %
-  %%%%%%%%%%%%%%%%
+  % DEBUG: To pass into the C++ version of the EKF
+  outputData = zeros(numPoints, 17);
+  tow = 0;
 
   % Waitbar for displaying simulation progress. There are occasions where this window will stay open
   % after the program fails to exit cleanly. It can only be closed using this command:
@@ -162,8 +150,8 @@ try
     end
 
     % Controller update
-    [sp.position, sp.velocity, flightVar] = GetSetpoints(tSim(sIndex), sEstimate(:, sIndex), traj, false, true, flightVar);
-    [rotRate, sp, pid] = ctrl.update(sEstimate(:, sIndex), sp, const, dt_flightControl);
+    [sp.position, sp.velocity, flightVar] = GetSetpoints(tSim(sIndex), s(:, sIndex), traj, true, true, flightVar);
+    [rotRate, sp, pid] = ctrl.update(s(:, sIndex), sp, const, dt_flightControl);
 
     % Save the setpoints for plotting later
     setpoints.position(:, LV1) = sp.position;
@@ -175,43 +163,37 @@ try
 
     % This loop runs the simulation and saves points between flight controller updates.
     for LV2 = 1:numSnapshots
-      
-      [t_temp, s_temp] = ode45(@(t, s)ODEs(t, s, rotRate, const, windVel(sIndex)), [0, dt_sim], s(:, sIndex), options);
+      [t_temp, s_temp] = ode45(@(t, s)ODEs(t, s, rotRate, const), [0, dt_sim], s(:, sIndex), options);
       s(:, sIndex + 1) = s_temp(end, :);
       
-      if opt.useEKF == true
+      if useEKF == true
         % For generating sensor measurements, calculate the state derivative at the current time
         ds = ODEs(0, s(:, sIndex), rotRate, const);
-        ds_ = ODEs(0, s(:, sIndex+1), rotRate, const);
         % Take the acceleration, put it in the body frame, add gravity, add noise
-        accelTruth(:, sIndex) = Quaternion2DCM(s(4:7, sIndex))*(ds(8:10) - [0;0;const.g]);
-        accelMeas(:, sIndex) = accelTriad.GetMeasurement(accelTruth(:, sIndex), dt_sim);
-				accelBiasTruth(:, sIndex) = accelTriad.inRunBias;
+        trueAccel = Quaternion2DCM(s(4:7, sIndex))*(ds(8:10) - [0;0;const.g]);
+        accelMeas = accelTriad.GetMeasurement(trueAccel, dt_sim);
         % Take the body rotation rates, add noise
-        gyroTruth(:, sIndex) = s(11:13, sIndex);
-        gyroMeas(:, sIndex) = gyroTriad.GetMeasurement(gyroTruth(:, sIndex), dt_sim);
-				gyroBiasTruth(:, sIndex) = gyroTriad.inRunBias;
+        trueGyro = s(11:13, sIndex);
+        gyroMeas = gyroTriad.GetMeasurement(trueGyro, dt_sim);
 
         % Determine availability of position measurement
-        if tSim(sIndex+1) - measUpdatePrev > 1/measUpdateRate
-          Y = s(1:3, sIndex+1) + const.sigma_pos.*randn(3, 1)*0.0000001;
-          measUpdatePrev = tSim(sIndex+1);
+        if tSim(sIndex) - measUpdatePrev > 1/measUpdateRate
+          Y = s(1:3, sIndex+1) + const.sigma_pos.*randn(3, 1)/2;
+          measUpdatePrev = tSim(sIndex);
 
           % DEBUG: To pass into the C++ version of the EKF
-          % tow = tow + 1;
-          % outputData(sIndex, :) = [tSim(sIndex)*1e6, [accelMeas', gyroMeas'], Y', tow, s(1:3, sIndex+1)', DCM2Euler321(Quaternion2DCM(s(4:7, sIndex+1)))'];
+          tow = tow + 1;
+          outputData(sIndex, :) = [tSim(sIndex)*1e6, [accelMeas', gyroMeas'], Y', tow, s(1:3, sIndex+1)', DCM2Euler321(Quaternion2DCM(s(4:7, sIndex+1)))'];
         else
           Y = [];
           % DEBUG: To pass into the C++ version of the EKF
-          % outputData(sIndex, :) = [tSim(sIndex)*1e6, [accelMeas', gyroMeas'], [0, 0, 0], tow, s(1:3, sIndex+1)', DCM2Euler321(Quaternion2DCM(s(4:7, sIndex+1)))'];
+          outputData(sIndex, :) = [tSim(sIndex)*1e6, [accelMeas', gyroMeas'], [0, 0, 0], tow, s(1:3, sIndex+1)', DCM2Euler321(Quaternion2DCM(s(4:7, sIndex+1)))'];
         end
         
         % Run the EKF to get an estimated state
-        [ekfState, P, qEst] = EKF(ekfState, Y, [accelMeas(:, sIndex); gyroMeas(:, sIndex)], P, const, dt_sim, sEstimate(4:7, sIndex));
-				accelBiasEstimate(:, sIndex + 1) = ekfState(10:12);
-				gyroBiasEstimate(:, sIndex + 1) = ekfState(13:15);
+        [ekfState, P, qEst] = EKF(ekfState, Y, [accelMeas; gyroMeas], P, const, dt_sim, sEstimate(4:7, sIndex));
 
-        sEstimate(:, sIndex + 1) = [ekfState(1:3); qEst; ekfState(4:6); gyroMeas(:, sIndex)];
+        sEstimate(:, sIndex + 1) = [ekfState(1:3); qEst; ekfState(4:6); gyroMeas];
       else
         sEstimate(:, sIndex + 1) = s(1:13, sIndex + 1);
       end
@@ -224,20 +206,18 @@ try
   delete(wb);
 
   % DEBUG: To pass into the C++ version of the EKF
-  % writematrix(outputData, "flightData.csv");
-  % mocapPosition_i = s(1:3, :)';
-  % q_i = s(4:7, :)';
-  % time = tSim;
-  % save("mocapData", "mocapPosition_i", "q_i", "time");
+  writematrix(outputData, "flightData.csv");
+  mocapPosition_i = s(1:3, :)';
+  q_i = s(4:7, :)';
+  time = tSim;
+  save("mocapData", "mocapPosition_i", "q_i", "time");
 
   disp("Post processing...")
   postprocessing;
 
 
-  if opt.makePlots == true
-    disp("Plotting...")
-    plotscript;
-  end
+  disp("Plotting...")
+  plotscript;
 
   save simData;
 

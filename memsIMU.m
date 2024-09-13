@@ -6,6 +6,7 @@ classdef memsIMU < handle
     tau
     sigmaWhite
     sigmaGM
+		inRunBias = [0; 0; 0]
   end
   methods
     function obj = memsIMU(tau, sigmaWhite, sigmaGM)
@@ -28,9 +29,9 @@ classdef memsIMU < handle
       % The output of the accel/gyro is modeled as
       %   output = truth + nullShift + inRunBias + noise
       whiteNoise = randn(3, 1).*obj.sigmaWhite;
-      inRunBias = CalculateInRun(obj, dt);
+      obj.inRunBias = CalculateInRun(obj, dt);
 
-      output = truth + obj.nullShift + whiteNoise + inRunBias;
+      output = truth + obj.nullShift + whiteNoise + obj.inRunBias;
     end
 
     function bias = CalculateInRun(obj, dt)

@@ -49,9 +49,9 @@ const.Irzz = 1.5e-5;
 
 % Motor constants
 % FIXME: These constants need updating
-const.kt = 4.9831e-6;  % thrust coefficient [N/(rad/s)^2]
+const.kt = 4.9e-6;  % thrust coefficient [N/(rad/s)^2]
 % Approximate moment coefficient [Nm/(rad/s)^2]
-const.km = 1e-5;
+const.km = 7.9e-8;
 const.minThrust = 1.0;  % Minimum total thrust [N]
 const.minW = 277;  % minimum motor rotation speed [rad/s]
 
@@ -63,8 +63,8 @@ elseif bat_4s_5200mAh == true
 	const.maxThrust = 32.20;  % Maximum total thrust [N]
 	const.maxW = 1500;  % maximum motor rotation speed [rad/s]
 	% w = kw1*u^2 + kw2*u
-	const.kw1 = -1.2349e3;
-	const.kw2 = 2.7856e3;
+	const.kw1 = 3.9e-7;
+	const.kw2 = 1.2e-4;
 end
 
 
@@ -88,7 +88,7 @@ const.mixerCoefficientsInv = inv(const.mixerCoefficients);
 clear kt km dymf dymb dxmf dxmb;
 
 % Drag force (Not used, because ...)
-const.Cd = 0;  % Drag coefficient
+const.Cd = 0.05;  % Drag coefficient
 
 
 % Controller gains
@@ -97,13 +97,13 @@ const.Cd = 0;  % Drag coefficient
 % const.Ki_att = diag([4.81, 4.81, 0.00]);
 % const.Kd_att = diag([0.34, 0.34, 0.00]);
 const.Kp_att = diag([1.66, 1.66, 0.11]);
-const.Ki_att = diag([4.81, 4.81, 0.00]);
+const.Ki_att = diag([4.81, 4.81, 0.0]);
 const.Kd_att = diag([0.34, 0.34, 0.1]);
 
 % Position
-const.Kp_pos = diag([5.0,  5.0,  8.0]);
-const.Ki_pos = diag([3.0,  3.0,  8.0]);
-const.Kd_pos = diag([8.0,  8.0, 16.0]);
+const.Kp_pos = diag([3.48,  3.48, 5]);
+const.Ki_pos = diag([3,  3,  2]);
+const.Kd_pos = diag([3.11,  3.11, 5]);
 
 const.k_x = 13;
 const.k_v = 5.5*2;
@@ -133,21 +133,21 @@ N = 15;
 
 % Accel/gyro model values
 % GM time constant
-const.tau_a = 3*[300 300 300]';
-const.tau_g = 3*[200 200 200]'; 
+const.tau_a = [400 400 400]';
+const.tau_g = [300 300 300]'; 
 % GM sigma
-const.sigma_acc_gm = [3.993E-3 5.243E-3 4.660E-3]';
-const.sigma_gyro_gm = [2.56E-4 3.76E-4 1.40E-4]';
+const.sigma_acc_gm = [0.018 0.018 0.018]';
+const.sigma_gyro_gm = [4E-4 4E-4 4E-4]';
 % White noise
-const.sigma_acc = [0.048 0.048 0.063]';
-const.sigma_gyro = [0.0025 0.0025 0.0015]';
+const.sigma_acc = [0.04 0.03 0.05]';
+const.sigma_gyro = [0.0015 0.0015 0.0014]';
 
 % Inital conditions
-const.sigma_initial_pos = 0.2*ones(3,1);
-const.sigma_initial_vel = 0.2*ones(3,1);
-const.sigma_initial_att = ([pi/60 pi/60 pi/60]');
-const.sigma_initial_acc_bias = 0.1*ones(3,1); 
-const.sigma_initial_gyro_bias = 0.1*ones(3,1);
+const.sigma_initial_pos = 1*ones(3,1);
+const.sigma_initial_vel = 1*ones(3,1);
+const.sigma_initial_att = ([pi/12 pi/12 pi/12]');
+const.sigma_initial_acc_bias = 0.5*ones(3,1); 
+const.sigma_initial_gyro_bias = 0.001*ones(3,1);
 
 % State covariance
 P = zeros(N,N);
@@ -169,5 +169,5 @@ const.H = zeros(3, N);
 const.H(1:3,1:3) = eye(3);
 
 % Measurement noise covariance
-const.sigma_pos = [0.02 0.02 0.02]';
+const.sigma_pos = [0.05 0.05 0.05]';
 const.R = diag( const.sigma_pos.^2 );
