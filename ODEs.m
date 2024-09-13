@@ -1,4 +1,4 @@
-function  [dot_x] = ODEs(t, s, u, const)
+function  [dot_x] = ODEs(t, s, u, const, windVel)
   % DESCRIPTION:
   %   Computes the state vector derivative at time t. 
   % USAGE:
@@ -22,6 +22,10 @@ function  [dot_x] = ODEs(t, s, u, const)
   % Last updated: April 2024
   % Based on the quadcopter sim developed by John Bass :
   %   github.com/bobzwik/Quadcopter_SimCon
+
+  if nargin < 5
+    windVel = 0;
+  end
 
   % Extract from const
   Cd = const.Cd;
@@ -93,9 +97,9 @@ function  [dot_x] = ODEs(t, s, u, const)
   TorM4 = torque(4);
 
   % TODO: add wind
-  velW = 0;
-  qW1 = 2*pi*t;  % change this name
-  qW2 = pi*t;  % change this name
+  velW = windVel;
+  qW1 = t;  % change this name
+  qW2 = t;  % change this name
 	
 
   % Rigid body dynamics

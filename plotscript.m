@@ -204,3 +204,60 @@ ylabel("y (m)");
 zlabel("z (m)");
 legend();
 clear f;
+
+
+% Additional plots for when EKF is enabled
+if opt.useEKF == true
+	% Plot accelerometer measurements
+	figure(Name="Accelerometer")
+	for i = 1:3
+		s(i) = subplot(3, 1, i);
+		plot(tSim, accelTruth(i, :), LineWidth=lw, DisplayName="Truth", LineStyle=defaultLS, Color=defaultColor);
+		hold on
+		plot(tSim, accelMeas(i, :), LineStyle="none", Marker=".", MarkerSize=12, Color=estimateColor, DisplayName="Measured")
+		hold off
+		ylabel(['a_', num2str(i), '(m/s^2)']);
+	end
+	xlabel(s(3), 'time (s)')
+	legend(s(1))
+
+	% Plot gyro measurements
+	figure(Name="Gyro")
+	for i = 1:3
+		s(i) = subplot(3, 1, i);
+		plot(tSim, gyroTruth(i, :), LineWidth=lw, DisplayName="Truth", LineStyle=defaultLS, Color=defaultColor);
+		hold on
+		plot(tSim, gyroMeas(i, :), LineStyle="none", Marker=".", MarkerSize=12, Color=estimateColor, DisplayName="Measured")
+		hold off
+		ylabel(['w_', num2str(i), '(rad/s)']);
+	end
+	xlabel(s(3), 'time (s)')
+	legend(s(1))
+
+	% Plot accelerometer bias	
+	figure(Name="Accelerometer bias")
+	for i = 1:3
+		s(i) = subplot(3, 1, i);
+		plot(tSim, accelBiasTruth(i, :), LineWidth=lw, DisplayName="Truth", LineStyle=defaultLS, Color=defaultColor);
+		hold on
+		plot(tSim, accelBiasEstimate(i, :), LineStyle=estimateLS, LineWidth=lw, Color=estimateColor, DisplayName="Estimate")
+		hold off
+		ylabel(['b_{a', num2str(i), '} (m/s^2)']);
+	end
+	xlabel(s(3), 'time (s)')
+	legend(s(1))
+
+	% Plot gyro bias	
+	figure(Name="Gyro bias")
+	for i = 1:3
+		s(i) = subplot(3, 1, i);
+		plot(tSim, gyroBiasTruth(i, :), LineWidth=lw, DisplayName="Truth", LineStyle=defaultLS, Color=defaultColor);
+		hold on
+		plot(tSim, gyroBiasEstimate(i, :), LineStyle=estimateLS, LineWidth=lw, Color=estimateColor, DisplayName="Estimate")
+		hold off
+		ylabel(['b_{a', num2str(i), '} (m/s^2)']);
+	end
+	xlabel(s(3), 'time (s)')
+	legend(s(1))
+
+end

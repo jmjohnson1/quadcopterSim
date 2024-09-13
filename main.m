@@ -13,11 +13,11 @@ opt.debugEKFFiles = false;
 % Time options
 tStart = 0;  % Simulation end time [sec]
 tEnd = 30;  % Simulation start time [sec]
-looprateFC = 250;  % Flight controller loop rate [Hz]
-numSnapshots = 1;  % Number of states to save between each FC update
+looprateFC = 100;  % Flight controller loop rate [Hz]
+numSnapshots = 2;  % Number of states to save between each FC update
 
 % Define how often measurements are passed into the EKF
-measUpdateRate = 1;  % Hz
+measUpdateRate = 5;  % Hz
 
 %%%%%%%%%%%%%%%%%%%%%
 % Trajectory Import %
@@ -99,6 +99,14 @@ try
   % Initialize accelerometer and gyro objects
   gyroTriad = memsIMU(const.tau_g, const.sigma_gyro, const.sigma_gyro_gm);
   accelTriad = memsIMU(const.tau_a, const.sigma_acc, const.sigma_acc_gm);
+	accelTruth = zeros(3, numPoints);
+	gyroTruth = zeros(3, numPoints);
+	accelMeas = zeros(3, numPoints);
+	gyroMeas = zeros(3, numPoints);
+	accelBiasEstimate = zeros(3, numPoints);
+	gyroBiasEstimate = zeros(3, numPoints);
+	accelBiasTruth = zeros(3, numPoints);
+	gyroBiasTruth = zeros(3, numPoints);
 
   ctrl = controller; % Create controller object
   options = odeset('AbsTol',1e-11,'RelTol',1e-11); % Set integration tolerences
@@ -113,6 +121,8 @@ try
   sEstimate = zeros(13, numPoints);
   sEstimate(:, 1) = s0(1:13);
   measUpdatePrev = 0;
+
+  windVel = randn(numPoints, 1)*3;
 
   % This will track where to access and save states in the sim
   sIndex = 1;  
@@ -152,7 +162,7 @@ try
     end
 
     % Controller update
-    [sp.position, sp.velocity, flightVar] = GetSetpoints(tSim(sIndex), sEstimate(:, sIndex), traj, true, true, flightVar);
+    [sp.position, sp.velocity, flightVar] = GetSetpoints(tSim(sIndex), sEstimate(:, sIndex), traj, false, true, flightVar);
     [rotRate, sp, pid] = ctrl.update(sEstimate(:, sIndex), sp, const, dt_flightControl);
 
     % Save the setpoints for plotting later
@@ -165,23 +175,27 @@ try
 
     % This loop runs the simulation and saves points between flight controller updates.
     for LV2 = 1:numSnapshots
-      [t_temp, s_temp] = ode45(@(t, s)ODEs(t, s, rotRate, const), [0, dt_sim], s(:, sIndex), options);
+      
+      [t_temp, s_temp] = ode45(@(t, s)ODEs(t, s, rotRate, const, windVel(sIndex)), [0, dt_sim], s(:, sIndex), options);
       s(:, sIndex + 1) = s_temp(end, :);
       
       if opt.useEKF == true
         % For generating sensor measurements, calculate the state derivative at the current time
         ds = ODEs(0, s(:, sIndex), rotRate, const);
+        ds_ = ODEs(0, s(:, sIndex+1), rotRate, const);
         % Take the acceleration, put it in the body frame, add gravity, add noise
-        trueAccel = Quaternion2DCM(s(4:7, sIndex))*(ds(8:10) - [0;0;const.g]);
-        accelMeas = accelTriad.GetMeasurement(trueAccel, dt_sim);
+        accelTruth(:, sIndex) = Quaternion2DCM(s(4:7, sIndex))*(ds(8:10) - [0;0;const.g]);
+        accelMeas(:, sIndex) = accelTriad.GetMeasurement(accelTruth(:, sIndex), dt_sim);
+				accelBiasTruth(:, sIndex) = accelTriad.inRunBias;
         % Take the body rotation rates, add noise
-        trueGyro = s(11:13, sIndex);
-        gyroMeas = gyroTriad.GetMeasurement(trueGyro, dt_sim);
+        gyroTruth(:, sIndex) = s(11:13, sIndex);
+        gyroMeas(:, sIndex) = gyroTriad.GetMeasurement(gyroTruth(:, sIndex), dt_sim);
+				gyroBiasTruth(:, sIndex) = gyroTriad.inRunBias;
 
         % Determine availability of position measurement
-        if tSim(sIndex) - measUpdatePrev > 1/measUpdateRate
-          Y = s(1:3, sIndex+1) + const.sigma_pos.*randn(3, 1)/100;
-          measUpdatePrev = tSim(sIndex);
+        if tSim(sIndex+1) - measUpdatePrev > 1/measUpdateRate
+          Y = s(1:3, sIndex+1) + const.sigma_pos.*randn(3, 1)*0.0000001;
+          measUpdatePrev = tSim(sIndex+1);
 
           % DEBUG: To pass into the C++ version of the EKF
           % tow = tow + 1;
@@ -193,9 +207,11 @@ try
         end
         
         % Run the EKF to get an estimated state
-        [ekfState, P, qEst] = EKF(ekfState, Y, [accelMeas; gyroMeas], P, const, dt_sim, sEstimate(4:7, sIndex));
+        [ekfState, P, qEst] = EKF(ekfState, Y, [accelMeas(:, sIndex); gyroMeas(:, sIndex)], P, const, dt_sim, sEstimate(4:7, sIndex));
+				accelBiasEstimate(:, sIndex + 1) = ekfState(10:12);
+				gyroBiasEstimate(:, sIndex + 1) = ekfState(13:15);
 
-        sEstimate(:, sIndex + 1) = [ekfState(1:3); qEst; ekfState(4:6); gyroMeas];
+        sEstimate(:, sIndex + 1) = [ekfState(1:3); qEst; ekfState(4:6); gyroMeas(:, sIndex)];
       else
         sEstimate(:, sIndex + 1) = s(1:13, sIndex + 1);
       end
