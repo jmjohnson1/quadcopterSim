@@ -45,8 +45,8 @@ measUpdateRate = 5;  % Hz
 % trajType = 'minsnap';
 % t_wp = linspace(0, 20, 4);
 % waypoints = [0.00,  0.00,  -0.40;
-%              0.00,  0.00,  -0.75;
-%              0.00,  0.00,  -1.50;
+%              0.00,  1.00,  -0.75;
+%              1.00,  1.00,  -1.50;
 %              0.00,  0.00,  -0.75]';
 % waypoints = [waypoints; t_wp];
 % traj = GenerateTrajectory(waypoints, trajType, false); % Import trajectory
@@ -185,16 +185,18 @@ try
         ds_ = ODEs(0, s(:, sIndex+1), rotRate, const);
         % Take the acceleration, put it in the body frame, add gravity, add noise
         accelTruth(:, sIndex) = Quaternion2DCM(s(4:7, sIndex))*(ds(8:10) - [0;0;const.g]);
-        accelMeas(:, sIndex) = accelTriad.GetMeasurement(accelTruth(:, sIndex), dt_sim);
+        accelMeas(:, sIndex) = accelTruth(:, sIndex);
+        % accelMeas(:, sIndex) = accelTriad.GetMeasurement(accelTruth(:, sIndex), dt_sim);
 				accelBiasTruth(:, sIndex) = accelTriad.inRunBias;
         % Take the body rotation rates, add noise
         gyroTruth(:, sIndex) = s(11:13, sIndex);
-        gyroMeas(:, sIndex) = gyroTriad.GetMeasurement(gyroTruth(:, sIndex), dt_sim);
+        gyroMeas(:, sIndex) = gyroTruth(:, sIndex);
+        % gyroMeas(:, sIndex) = gyroTriad.GetMeasurement(gyroTruth(:, sIndex), dt_sim);
 				gyroBiasTruth(:, sIndex) = gyroTriad.inRunBias;
 
         % Determine availability of position measurement
         if tSim(sIndex+1) - measUpdatePrev > 1/measUpdateRate
-          Y = s(1:3, sIndex+1) + const.sigma_pos.*randn(3, 1)*0.0000001;
+          Y = s(1:3, sIndex+1) + const.sigma_pos.*randn(3, 1);
           measUpdatePrev = tSim(sIndex+1);
 
           % DEBUG: To pass into the C++ version of the EKF
