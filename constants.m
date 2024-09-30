@@ -1,7 +1,7 @@
 %%% SET PID GAINS HERE %%%
-Kp_z = 0;
-Ki_z = 0;
-Kd_z = 0;
+Kp_z = 3;
+Ki_z = 1;
+Kd_z = 3;
 
 
 
@@ -152,7 +152,7 @@ const.sigma_gyro = [0.0015 0.0015 0.0014]';
 % Inital conditions
 const.sigma_initial_pos = 1*ones(3,1);
 const.sigma_initial_vel = 1*ones(3,1);
-const.sigma_initial_att = ([pi/12 pi/12 pi/12]');
+const.sigma_initial_att = ([pi/30 pi/30 pi]');
 const.sigma_initial_acc_bias = 0.5*ones(3,1); 
 const.sigma_initial_gyro_bias = 0.001*ones(3,1);
 

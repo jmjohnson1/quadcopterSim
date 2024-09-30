@@ -13,7 +13,7 @@ opt.debugEKFFiles = false;
 % Time options
 tStart = 0;  % Simulation end time [sec]
 tEnd = 30;  % Simulation start time [sec]
-looprateFC = 100;  % Flight controller loop rate [Hz]
+looprateFC = 200;  % Flight controller loop rate [Hz]
 numSnapshots = 2;  % Number of states to save between each FC update
 
 % Define how often measurements are passed into the EKF
@@ -185,13 +185,13 @@ try
         ds_ = ODEs(0, s(:, sIndex+1), rotRate, const);
         % Take the acceleration, put it in the body frame, add gravity, add noise
         accelTruth(:, sIndex) = Quaternion2DCM(s(4:7, sIndex))*(ds(8:10) - [0;0;const.g]);
-        accelMeas(:, sIndex) = accelTruth(:, sIndex);
-        % accelMeas(:, sIndex) = accelTriad.GetMeasurement(accelTruth(:, sIndex), dt_sim);
+        % accelMeas(:, sIndex) = accelTruth(:, sIndex);
+        accelMeas(:, sIndex) = accelTriad.GetMeasurement(accelTruth(:, sIndex), dt_sim);
 				accelBiasTruth(:, sIndex) = accelTriad.inRunBias;
         % Take the body rotation rates, add noise
         gyroTruth(:, sIndex) = s(11:13, sIndex);
-        gyroMeas(:, sIndex) = gyroTruth(:, sIndex);
-        % gyroMeas(:, sIndex) = gyroTriad.GetMeasurement(gyroTruth(:, sIndex), dt_sim);
+        % gyroMeas(:, sIndex) = gyroTruth(:, sIndex);
+        gyroMeas(:, sIndex) = gyroTriad.GetMeasurement(gyroTruth(:, sIndex), dt_sim);
 				gyroBiasTruth(:, sIndex) = gyroTriad.inRunBias;
 
         % Determine availability of position measurement
