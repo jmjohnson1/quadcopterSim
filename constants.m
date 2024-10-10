@@ -1,3 +1,10 @@
+%%% SET PID GAINS HERE %%%
+Kp_z = 3;
+Ki_z = 1;
+Kd_z = 3;
+
+
+
 % Configurations:
 bat_3s_3300mAh = false;
 bat_4s_5200mAh = true;
@@ -101,9 +108,9 @@ const.Ki_att = diag([4.81, 4.81, 0.0]);
 const.Kd_att = diag([0.34, 0.34, 0.1]);
 
 % Position
-const.Kp_pos = diag([3.48,  3.48, 5]);
-const.Ki_pos = diag([3,  3,  2]);
-const.Kd_pos = diag([3.11,  3.11, 5]);
+const.Kp_pos = diag([3.48,  3.48, Kp_z]);
+const.Ki_pos = diag([3,  3,  Ki_z]);
+const.Kd_pos = diag([3.11,  3.11, Kd_z]);
 
 const.k_x = 13;
 const.k_v = 5.5*2;
@@ -147,7 +154,7 @@ const.sigma_gyro = [0.00015 0.00015 0.00014]';
 % Inital conditions
 const.sigma_initial_pos = 1*ones(3,1);
 const.sigma_initial_vel = 1*ones(3,1);
-const.sigma_initial_att = ([pi/12 pi/12 pi/12]');
+const.sigma_initial_att = ([pi/30 pi/30 pi]');
 const.sigma_initial_acc_bias = 0.5*ones(3,1); 
 const.sigma_initial_gyro_bias = 0.001*ones(3,1);
 

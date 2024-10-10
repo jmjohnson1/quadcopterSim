@@ -28,7 +28,7 @@ classdef memsIMU < handle
     function output = GetMeasurement(obj, truth, dt)
       % The output of the accel/gyro is modeled as
       %   output = truth + nullShift + inRunBias + noise
-      whiteNoise = randn(3, 1).*obj.sigmaWhite;
+      whiteNoise = randn(3, 1).*obj.sigmaWhite*100;
       obj.inRunBias = CalculateInRun(obj, dt);
 
       output = truth + obj.nullShift + whiteNoise + obj.inRunBias;
