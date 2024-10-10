@@ -1,14 +1,11 @@
 %%% SET PID GAINS HERE %%%
-Kp_z = 3;
-Ki_z = 1;
-Kd_z = 3;
-
-
+Kp_z = 50;
+Ki_z = 10;
+Kd_z = 11;
 
 % Configurations:
 bat_3s_3300mAh = false;
 bat_4s_5200mAh = true;
-
 
 rad2deg = 180/pi;
 deg2rad = 1/rad2deg;
@@ -29,9 +26,8 @@ const.dymb = 0.11383;  % y distance to rear motors [m]
 const.dzm = 0.021;  % z distance to motors [m]
 
 % const.mB = 0.842;  % Quad mass (3s 3300mAh) [kg]
-const.mB = 1.095;  % Quad mass (4s 5200mAh) [kg]
-const.mB_ctrl = 0.95;  % Quad mass used in controller [kg]
-const.mB_ctrl = 1.095;
+const.mB = 1.2;  % Quad mass (4s 5200mAh) [kg]
+const.mB_ctrl = 1.2;  % Quad mass used in controller [kg]
 
 % Inertia matrix [kg*m^2]
 
@@ -48,6 +44,9 @@ elseif bat_4s_5200mAh == true
 const.Ib = [6144384.31, 5120.80, 215538.86;
             5120.80, 4616039.78, -645.56;
             215538.86, -645.56, 9758320.53]*1e-9;
+% const.Ib = [6144384.31, 0, 0;
+%             0, 6144384.31, 0;
+%             0, 0, 9758320.53]*1e-9;
 end
 
 const.Ib_inv = inv(const.Ib);
@@ -55,10 +54,9 @@ const.Ib_inv = inv(const.Ib);
 const.Irzz = 1.5e-5;  
 
 % Motor constants
-% FIXME: These constants need updating
-const.kt = 4.9e-6;  % thrust coefficient [N/(rad/s)^2]
+const.kt = 4.8e-6;  % thrust coefficient [N/(rad/s)^2]
 % Approximate moment coefficient [Nm/(rad/s)^2]
-const.km = 7.9e-8;
+const.km = 7.7e-8;
 const.minThrust = 1.0;  % Minimum total thrust [N]
 const.minW = 277;  % minimum motor rotation speed [rad/s]
 
@@ -67,7 +65,7 @@ if bat_3s_3300mAh == true
 	const.maxW = 1094;  % maximum motor rotation speed [rad/s]
 	const.kw = 8.3551e-7;  % normalized command to angular rate: u = kw*w^2
 elseif bat_4s_5200mAh == true
-	const.maxThrust = 32.20;  % Maximum total thrust [N]
+	const.maxThrust = 43.0;  % Maximum total thrust [N]
 	const.maxW = 1500;  % maximum motor rotation speed [rad/s]
 	% w = kw1*u^2 + kw2*u
 	const.kw1 = 3.9e-7;
@@ -87,9 +85,9 @@ dymb = const.dymb;
 dxmf = const.dxmf;
 dxmb = const.dxmb;
 const.mixerCoefficients = [kt, kt, kt, kt;
-                     dymf*kt, -dymf*kt, -dymb*kt, dymb*kt;
-                     dxmf*kt, dxmf*kt, -dxmb*kt, -dxmb*kt;
-                     -km, km, -km, km];
+                           dymf*kt, -dymf*kt, -dymb*kt, dymb*kt;
+                           dxmf*kt, dxmf*kt, -dxmb*kt, -dxmb*kt;
+                           -km, km, -km, km];
 const.mixerCoefficientsInv = inv(const.mixerCoefficients);
 
 clear kt km dymf dymb dxmf dxmb;
@@ -104,13 +102,13 @@ const.Cd = 0.05;  % Drag coefficient
 % const.Ki_att = diag([4.81, 4.81, 0.00]);
 % const.Kd_att = diag([0.34, 0.34, 0.00]);
 const.Kp_att = diag([1.66, 1.66, 0.11]);
-const.Ki_att = diag([4.81, 4.81, 0.0]);
+const.Ki_att = diag([0.5, 0.5, 0.0]);
 const.Kd_att = diag([0.34, 0.34, 0.1]);
 
 % Position
-const.Kp_pos = diag([3.48,  3.48, Kp_z]);
-const.Ki_pos = diag([3,  3,  Ki_z]);
-const.Kd_pos = diag([3.11,  3.11, Kd_z]);
+const.Kp_pos = diag([6  6, Kp_z]);
+const.Ki_pos = diag([1,  1,  Ki_z]);
+const.Kd_pos = diag([4,  4, Kd_z]);
 
 const.k_x = 13;
 const.k_v = 5.5*2;
@@ -127,8 +125,8 @@ const.sat = 1;
 const.maxPitchRoll = 30*deg2rad;
 
 % Limit on the integral term
-const.iMax_pos = 1;  % For position controller
-const.iMax_att = 50;  % For attitude controller
+const.iMax_pos = 10;  % For position controller
+const.iMax_att = 10;  % For attitude controller
 
 
 
@@ -151,9 +149,9 @@ const.sigma_gyro = [0.0015 0.0015 0.0014]';
 
 % Inital conditions
 const.sigma_initial_pos = 1*ones(3,1);
-const.sigma_initial_vel = 1*ones(3,1);
-const.sigma_initial_att = ([pi/30 pi/30 pi]');
-const.sigma_initial_acc_bias = 0.5*ones(3,1); 
+const.sigma_initial_vel = 0.1*ones(3,1);
+const.sigma_initial_att = ([pi/30 pi/30 pi/3]');
+const.sigma_initial_acc_bias = 0.05*ones(3,1); 
 const.sigma_initial_gyro_bias = 0.001*ones(3,1);
 
 % State covariance

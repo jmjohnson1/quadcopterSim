@@ -12,12 +12,12 @@ opt.debugEKFFiles = false;
 
 % Time options
 tStart = 0;  % Simulation end time [sec]
-tEnd = 30;  % Simulation start time [sec]
+tEnd = 60;  % Simulation start time [sec]
 looprateFC = 200;  % Flight controller loop rate [Hz]
 numSnapshots = 2;  % Number of states to save between each FC update
 
 % Define how often measurements are passed into the EKF
-measUpdateRate = 5;  % Hz
+measUpdateRate = 5 ;  % Hz
 
 %%%%%%%%%%%%%%%%%%%%%
 % Trajectory Import %
@@ -74,7 +74,7 @@ try
   %%%%%%%%%%%%%%%%%%%%%%%%
   initPosition = [0, 0, 0]';  % initial position in local NED frame [m]
   initVelocity = [0, 0, 0]';  % initial velocity in local NED frame [m/s]
-  initAttitude = [0, 0, 160]'*deg2rad;  % initial roll, pitch, yaw [rad]
+  initAttitude = [0, 0, 180]'*deg2rad;  % initial roll, pitch, yaw [rad]
   initRates = [0, 0, 0]';  % Initial angular rates in body frame [rad/s]
 
   % Initial motor rates
@@ -152,7 +152,7 @@ try
   % Waitbar for displaying simulation progress. There are occasions where this window will stay open
   % after the program fails to exit cleanly. It can only be closed using this command:
   %   delete(findall(groot, 'type', 'figure'))
-  wb = waitbar(0, "Terribly Slow Simulation", 'CreateCancelBtn','setappdata(gcbf,''canceling'',1)');
+  wb = waitbar(0, "Running...", 'CreateCancelBtn','setappdata(gcbf,''canceling'',1)');
 
   % Run the sim
   for LV1 = 1:numUpdates 
@@ -162,7 +162,7 @@ try
     end
 
     % Controller update
-    [sp.position, sp.velocity, flightVar] = GetSetpoints(tSim(sIndex), sEstimate(:, sIndex), traj, false, true, flightVar);
+    [sp.position, sp.velocity, flightVar] = GetSetpoints(tSim(sIndex), sEstimate(:, sIndex), traj, true, true, flightVar);
     [rotRate, sp, pid] = ctrl.update(sEstimate(:, sIndex), sp, const, dt_flightControl);
 
     % Save the setpoints for plotting later
@@ -239,6 +239,13 @@ try
   if opt.makePlots == true
     disp("Plotting...")
     plotscript;
+  end
+  
+  if displayRotRateViolation == true
+    rotRateMessage = msgbox("Maximum control input exceeded! Adjust your gains!");
+  end
+  if displayPositionViolation == true
+    positionMessage = msgbox("Maximum horizontal error exceeded (probably due to aggressive gains)! Adjust your gains!");
   end
 
   save simData;

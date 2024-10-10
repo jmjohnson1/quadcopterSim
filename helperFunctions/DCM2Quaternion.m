@@ -21,8 +21,21 @@ else
     % This represents a rotation of pi, so the direction can be arbitrary.
     % In this case, let eps(1) > 0.
     eps_ba(1) = sqrt((C_ba(1,1) + 1)/2);
-    eps_ba(2) = sign(C_ba(1,2)) * sqrt((C_ba(2,2) + 1)/2);
-    eps_ba(3) = sign(C_ba(1,3)) * sqrt((C_ba(3,3) + 1)/2);
+    eps_ba(2) = sqrt((C_ba(2,2) + 1)/2);
+    eps_ba(3) = sqrt((C_ba(3,3) + 1)/2);
+
+    if eps_ba(1) > 0
+      eps_ba(2) = sign(C_ba(1, 2))*eps_ba(2);
+      eps_ba(3) = sign(C_ba(1, 3))*eps_ba(3);
+    elseif eps_ba(2) > 0
+      eps_ba(1) = sign(C_ba(1, 2))*eps_ba(1);
+      eps_ba(3) = sign(C_ba(2, 3))*eps_ba(3);
+    else
+      eps_ba(1) = sign(C_ba(1, 3))*eps_ba(1);
+      eps_ba(2) = sign(C_ba(2, 3))*eps_ba(2);
+    end
+
+    
 end
 
 q_ba = [eta_ba, eps_ba]';

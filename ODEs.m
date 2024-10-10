@@ -114,7 +114,7 @@ function  [dot_x] = ODEs(t, s, u, const, windVel)
                  (Cd*sign(velW*sin(qW1)*cos(qW2) - ydot)*(velW*sin(qW1)*cos(qW2) - ydot)^2 + 2*(q0*q1 - q2*q3)*(thrM1 + thrM2 + thrM3 + thrM4))/mB;
                  (-Cd*sign(velW*sin(qW2) + zdot)*(velW*sin(qW2) + zdot)^2 + -(thrM1 + thrM2 + thrM3 + thrM4)*(q0^2 - q1^2 - q2^2 + q3^2))/mB + g;
                  (IByy*q*r - IBzz*q*r - IRzz*(wM(1) - wM(2) + wM(3) - wM(4))*q + thrM1*dymf - thrM2*dymf - thrM3*dymb + thrM4*dymb)/IBxx;
-                 (-IBxx*p*r + IBzz*p*r + IRzz*(wM(1) - wM(2) + wM(3) - wM(4))*p + thrM1*dxmf + thrM2*dxmf - thrM3*dxmb - thrM4*dxmb - 0.5)/IByy;
+                 (-IBxx*p*r + IBzz*p*r + IRzz*(wM(1) - wM(2) + wM(3) - wM(4))*p + thrM1*dxmf + thrM2*dxmf - thrM3*dxmb - thrM4*dxmb)/IByy;
                  (IBxx*p*q - IByy*p*q - TorM1 + TorM2 - TorM3 + TorM4)/IBzz];
 
 	dot_x = [dot_x_quad; wdotM];

@@ -15,3 +15,16 @@ for LV1 = 1:numPoints
   eulerAnglesEst(:, LV1) = DCM2Euler321(C_bnEst)*rad2deg;
 	thrust(LV1) = sum(const.kt*motorRotRate(:, LV1).^2);
 end
+
+% Check for violations
+maxHorizontalError = 1.0;
+maxRotRate = 1400;
+
+displayRotRateViolation = false;
+displayPositionViolation = false;
+if any(motorRotRate > maxRotRate, 'all')
+  displayRotRateViolation = true;
+end
+if any(abs(position(1:2, :)) > maxHorizontalError, 'all')
+  displayPostionViolation = true;
+end
