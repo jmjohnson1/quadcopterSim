@@ -107,51 +107,51 @@ grid(axAtt, 'on');
 legend(axAtt(1));
 
 % Angular rates
-figure(Name="Angular Rates");
-labels = {'P (deg/s)', 'Q (deg/s)', 'R (deg/s)'};
-for i = 1:3
-axGyro(i) = subplot(3, 1, i);
-plot(tSim, s(10+i, :)*180/pi, ...
-        Color=defaultColor, ...
-        DisplayName="Truth", ...
-        LineWidth=lw, ...
-        LineStyle=defaultLS);
-if i == 3
-  hold on;
-  plot(tFc, setpoints.euler(3, :), ...
-        Color=setpointColor, ...
-        DisplayName="Setpoint", ...
-        LineWidth=lw, ...
-        LineStyle=setpointLS);
-  hold off;
-end
-ylabel(labels(i));
-end
-xlabel("Time (s)");
-legend(axGyro(3));
+% figure(Name="Angular Rates");
+% labels = {'P (deg/s)', 'Q (deg/s)', 'R (deg/s)'};
+% for i = 1:3
+% axGyro(i) = subplot(3, 1, i);
+% plot(tSim, s(10+i, :)*180/pi, ...
+%         Color=defaultColor, ...
+%         DisplayName="Truth", ...
+%         LineWidth=lw, ...
+%         LineStyle=defaultLS);
+% if i == 3
+%   hold on;
+%   plot(tFc, setpoints.euler(3, :), ...
+%         Color=setpointColor, ...
+%         DisplayName="Setpoint", ...
+%         LineWidth=lw, ...
+%         LineStyle=setpointLS);
+%   hold off;
+% end
+% ylabel(labels(i));
+% end
+% xlabel("Time (s)");
+% legend(axGyro(3));
 
 
 % Motor angular rates
-figure(Name="Motors");
-for i = 1:4
-  axMot(i) = subplot(2, 2, i);
-  plot(tFc, setpoints.rotRate(i, :), ...
-          Color=setpointColor, ...
-          DisplayName="Setpoint", ...
-          LineWidth=lw, ...
-          LineStyle=setpointLS);
-  hold on;
-  plot(tSim, motorRotRate(i, :), ...
-          Color=defaultColor, ...
-          DisplayName="Truth", ...
-          LineWidth=lw, ...
-          LineStyle=defaultLS);
-  hold off;
-  ylabel(sprintf("M%d \\omega (rad/s)", i));
-end
-xlabel("Time (s)");
-grid(axMot, 'on');
-legend(axMot(2));
+% figure(Name="Motors");
+% for i = 1:4
+%   axMot(i) = subplot(2, 2, i);
+%   plot(tFc, setpoints.rotRate(i, :), ...
+%           Color=setpointColor, ...
+%           DisplayName="Setpoint", ...
+%           LineWidth=lw, ...
+%           LineStyle=setpointLS);
+%   hold on;
+%   plot(tSim, motorRotRate(i, :), ...
+%           Color=defaultColor, ...
+%           DisplayName="Truth", ...
+%           LineWidth=lw, ...
+%           LineStyle=defaultLS);
+%   hold off;
+%   ylabel(sprintf("M%d \\omega (rad/s)", i));
+% end
+% xlabel("Time (s)");
+% grid(axMot, 'on');
+% legend(axMot(2));
 
 % Thrust setpoints
 figure(Name="thrust");
@@ -207,57 +207,57 @@ clear f;
 
 
 % Additional plots for when EKF is enabled
-if opt.useEKF == true
-	% Plot accelerometer measurements
-	figure(Name="Accelerometer")
-	for i = 1:3
-		s(i) = subplot(3, 1, i);
-		plot(tSim, accelTruth(i, :), LineWidth=lw, DisplayName="Truth", LineStyle=defaultLS, Color=defaultColor);
-		hold on
-		plot(tSim, accelMeas(i, :), LineStyle="none", Marker=".", MarkerSize=12, Color=estimateColor, DisplayName="Measured")
-		hold off
-		ylabel(['a_', num2str(i), '(m/s^2)']);
-	end
-	xlabel(s(3), 'time (s)')
-	legend(s(1))
+% if opt.useEKF == true
+% 	% Plot accelerometer measurements
+% 	figure(Name="Accelerometer")
+% 	for i = 1:3
+% 		s(i) = subplot(3, 1, i);
+% 		plot(tSim, accelTruth(i, :), LineWidth=lw, DisplayName="Truth", LineStyle=defaultLS, Color=defaultColor);
+% 		hold on
+% 		plot(tSim, accelMeas(i, :), LineStyle="none", Marker=".", MarkerSize=12, Color=estimateColor, DisplayName="Measured")
+% 		hold off
+% 		ylabel(['a_', num2str(i), '(m/s^2)']);
+% 	end
+% 	xlabel(s(3), 'time (s)')
+% 	legend(s(1))
+% 
+% 	% Plot gyro measurements
+% 	figure(Name="Gyro")
+% 	for i = 1:3
+% 		s(i) = subplot(3, 1, i);
+% 		plot(tSim, gyroTruth(i, :), LineWidth=lw, DisplayName="Truth", LineStyle=defaultLS, Color=defaultColor);
+% 		hold on
+% 		plot(tSim, gyroMeas(i, :), LineStyle="none", Marker=".", MarkerSize=12, Color=estimateColor, DisplayName="Measured")
+% 		hold off
+% 		ylabel(['w_', num2str(i), '(rad/s)']);
+% 	end
+% 	xlabel(s(3), 'time (s)')
+% 	legend(s(1))
+% 
+% 	% Plot accelerometer bias	
+% 	figure(Name="Accelerometer bias")
+% 	for i = 1:3
+% 		s(i) = subplot(3, 1, i);
+% 		plot(tSim, accelBiasTruth(i, :), LineWidth=lw, DisplayName="Truth", LineStyle=defaultLS, Color=defaultColor);
+% 		hold on
+% 		plot(tSim, accelBiasEstimate(i, :), LineStyle=estimateLS, LineWidth=lw, Color=estimateColor, DisplayName="Estimate")
+% 		hold off
+% 		ylabel(['b_{a', num2str(i), '} (m/s^2)']);
+% 	end
+% 	xlabel(s(3), 'time (s)')
+% 	legend(s(1))
+% 
+% 	% Plot gyro bias	
+% 	figure(Name="Gyro bias")
+% 	for i = 1:3
+% 		s(i) = subplot(3, 1, i);
+% 		plot(tSim, gyroBiasTruth(i, :), LineWidth=lw, DisplayName="Truth", LineStyle=defaultLS, Color=defaultColor);
+% 		hold on
+% 		plot(tSim, gyroBiasEstimate(i, :), LineStyle=estimateLS, LineWidth=lw, Color=estimateColor, DisplayName="Estimate")
+% 		hold off
+% 		ylabel(['b_{a', num2str(i), '} (m/s^2)']);
+% 	end
+% 	xlabel(s(3), 'time (s)')
+% 	legend(s(1))
 
-	% Plot gyro measurements
-	figure(Name="Gyro")
-	for i = 1:3
-		s(i) = subplot(3, 1, i);
-		plot(tSim, gyroTruth(i, :), LineWidth=lw, DisplayName="Truth", LineStyle=defaultLS, Color=defaultColor);
-		hold on
-		plot(tSim, gyroMeas(i, :), LineStyle="none", Marker=".", MarkerSize=12, Color=estimateColor, DisplayName="Measured")
-		hold off
-		ylabel(['w_', num2str(i), '(rad/s)']);
-	end
-	xlabel(s(3), 'time (s)')
-	legend(s(1))
-
-	% Plot accelerometer bias	
-	figure(Name="Accelerometer bias")
-	for i = 1:3
-		s(i) = subplot(3, 1, i);
-		plot(tSim, accelBiasTruth(i, :), LineWidth=lw, DisplayName="Truth", LineStyle=defaultLS, Color=defaultColor);
-		hold on
-		plot(tSim, accelBiasEstimate(i, :), LineStyle=estimateLS, LineWidth=lw, Color=estimateColor, DisplayName="Estimate")
-		hold off
-		ylabel(['b_{a', num2str(i), '} (m/s^2)']);
-	end
-	xlabel(s(3), 'time (s)')
-	legend(s(1))
-
-	% Plot gyro bias	
-	figure(Name="Gyro bias")
-	for i = 1:3
-		s(i) = subplot(3, 1, i);
-		plot(tSim, gyroBiasTruth(i, :), LineWidth=lw, DisplayName="Truth", LineStyle=defaultLS, Color=defaultColor);
-		hold on
-		plot(tSim, gyroBiasEstimate(i, :), LineStyle=estimateLS, LineWidth=lw, Color=estimateColor, DisplayName="Estimate")
-		hold off
-		ylabel(['b_{a', num2str(i), '} (m/s^2)']);
-	end
-	xlabel(s(3), 'time (s)')
-	legend(s(1))
-
-end
+% end

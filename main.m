@@ -12,7 +12,7 @@ opt.debugEKFFiles = false;
 
 % Time options
 tStart = 0;  % Simulation end time [sec]
-tEnd = 30;  % Simulation start time [sec]
+tEnd = 60;  % Simulation start time [sec]
 looprateFC = 200;  % Flight controller loop rate [Hz]
 numSnapshots = 2;  % Number of states to save between each FC update
 
@@ -51,7 +51,7 @@ measUpdateRate = 10;  % Hz
 % waypoints = [waypoints; t_wp];
 % traj = GenerateTrajectory(waypoints, trajType, false); % Import trajectory
 
-traj = MakeStep([-0.5 -1.0 -1.5 -1.0], [0 6 12 18]);
+traj = MakeStep([-0.5 -1.0 -1.5 -1.0 -1.0], [0 6 12 18 24]);
 
 try
   constants;
@@ -74,7 +74,7 @@ try
   %%%%%%%%%%%%%%%%%%%%%%%%
   initPosition = [0, 0, 0]';  % initial position in local NED frame [m]
   initVelocity = [0, 0, 0]';  % initial velocity in local NED frame [m/s]
-  initAttitude = [0, 0, 160]'*deg2rad;  % initial roll, pitch, yaw [rad]
+  initAttitude = [0, 0, 179]'*deg2rad;  % initial roll, pitch, yaw [rad]
   initRates = [0, 0, 0]';  % Initial angular rates in body frame [rad/s]
 
   % Initial motor rates
@@ -162,8 +162,9 @@ try
     end
 
     % Controller update
-    [sp.position, sp.velocity, flightVar] = GetSetpoints(tSim(sIndex), sEstimate(:, sIndex), traj, false, true, flightVar);
-    [rotRate, sp, pid] = ctrl.update(sEstimate(:, sIndex), sp, const, dt_flightControl);
+    [sp.position, sp.velocity, flightVar] = GetSetpoints(tSim(sIndex), sEstimate(:, sIndex), traj, true, true, flightVar);
+    % [rotRate, sp, pid] = ctrl.update(sEstimate(:, sIndex), sp, const, dt_flightControl);
+    [rotRate, sp, pid] = ctrl.update(sEstimate(:, sIndex), sp, const, dt_sim);
 
     % Save the setpoints for plotting later
     setpoints.position(:, LV1) = sp.position;
@@ -192,7 +193,7 @@ try
         gyroTruth(:, sIndex) = s(11:13, sIndex);
         % gyroMeas(:, sIndex) = gyroTruth(:, sIndex);
         gyroMeas(:, sIndex) = gyroTriad.GetMeasurement(gyroTruth(:, sIndex), dt_sim);
-				gyroBiasTruth(:, sIndex) = gyroTriad.inRunBias;
+	    gyroBiasTruth(:, sIndex) = gyroTriad.inRunBias;
 
         % Determine availability of position measurement
         if tSim(sIndex+1) - measUpdatePrev > 1/measUpdateRate

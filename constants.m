@@ -1,7 +1,7 @@
 %%% SET PID GAINS HERE %%%
-Kp_z = 3;
-Ki_z = 1;
-Kd_z = 3;
+Kp_z = 25;
+Ki_z = 10;
+Kd_z = 15;
 
 
 
@@ -29,7 +29,7 @@ const.dymb = 0.11383;  % y distance to rear motors [m]
 const.dzm = 0.021;  % z distance to motors [m]
 
 % const.mB = 0.842;  % Quad mass (3s 3300mAh) [kg]
-const.mB = 1.095;  % Quad mass (4s 5200mAh) [kg]
+const.mB = 1.2;  % Quad mass (4s 5200mAh) [kg]
 const.mB_ctrl = 0.95;  % Quad mass used in controller [kg]
 const.mB_ctrl = 1.095;
 
@@ -108,9 +108,12 @@ const.Ki_att = diag([4.81, 4.81, 0.0]);
 const.Kd_att = diag([0.34, 0.34, 0.1]);
 
 % Position
-const.Kp_pos = diag([3.48,  3.48, Kp_z]);
-const.Ki_pos = diag([3,  3,  Ki_z]);
-const.Kd_pos = diag([3.11,  3.11, Kd_z]);
+Kp_xy = 3.5;
+Ki_xy = 1.0;
+Kd_xy = 4.0;
+const.Kp_pos = diag([Kp_xy, Kp_xy, Kp_z]);
+const.Ki_pos = diag([Ki_xy, Ki_xy,  Ki_z]);
+const.Kd_pos = diag([Kd_xy, Kd_xy, Kd_z]);
 
 const.k_x = 13;
 const.k_v = 5.5*2;
