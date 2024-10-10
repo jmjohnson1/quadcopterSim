@@ -13,11 +13,11 @@ opt.debugEKFFiles = false;
 % Time options
 tStart = 0;  % Simulation end time [sec]
 tEnd = 30;  % Simulation start time [sec]
-looprateFC = 100;  % Flight controller loop rate [Hz]
+looprateFC = 200;  % Flight controller loop rate [Hz]
 numSnapshots = 2;  % Number of states to save between each FC update
 
 % Define how often measurements are passed into the EKF
-measUpdateRate = 5;  % Hz
+measUpdateRate = 10;  % Hz
 
 %%%%%%%%%%%%%%%%%%%%%
 % Trajectory Import %
@@ -194,7 +194,7 @@ try
 
         % Determine availability of position measurement
         if tSim(sIndex+1) - measUpdatePrev > 1/measUpdateRate
-          Y = s(1:3, sIndex+1) + const.sigma_pos.*randn(3, 1)*0.0000001;
+          Y = s(1:3, sIndex+1) + const.sigma_pos.*randn(3, 1);
           measUpdatePrev = tSim(sIndex+1);
 
           % DEBUG: To pass into the C++ version of the EKF

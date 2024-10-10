@@ -139,8 +139,10 @@ const.tau_g = [300 300 300]';
 const.sigma_acc_gm = [0.018 0.018 0.018]';
 const.sigma_gyro_gm = [4E-4 4E-4 4E-4]';
 % White noise
-const.sigma_acc = [0.04 0.03 0.05]';
-const.sigma_gyro = [0.0015 0.0015 0.0014]';
+% const.sigma_acc = [0.04 0.03 0.05]';
+% const.sigma_gyro = [0.0015 0.0015 0.0014]';
+const.sigma_acc = [0.004 0.003 0.005]';
+const.sigma_gyro = [0.00015 0.00015 0.00014]';
 
 % Inital conditions
 const.sigma_initial_pos = 1*ones(3,1);
@@ -169,5 +171,5 @@ const.H = zeros(3, N);
 const.H(1:3,1:3) = eye(3);
 
 % Measurement noise covariance
-const.sigma_pos = [0.05 0.05 0.05]';
+const.sigma_pos = [0.01 0.01 0.01]';
 const.R = diag( const.sigma_pos.^2 );
