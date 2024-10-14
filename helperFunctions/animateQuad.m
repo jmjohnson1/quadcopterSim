@@ -25,7 +25,7 @@ function animateQuad(pos, quat, time, waypoints, trajectory, fps)
 	open(vid);
 
 	hFig = figure(Name="Animation");
-	hFig.Position = [10 10, 1000 1000];
+	hFig.Position = [10 10, 500 500];
 	hFig.Visible = 'off';
 	frame = poseplot(q_ds(1), pos_ds(:, 1), MeshFileName="quadmesh.stl");
 	ax = gca;
@@ -35,8 +35,10 @@ function animateQuad(pos, quat, time, waypoints, trajectory, fps)
 	hold off
 	set(ax, "XLim", xLimits, "YLim", yLimits, "ZLim", zLimits);
 	axis equal;
+  M = struct('cdata', cell(1,N), 'colormap', cell(1,N));
 	M(1) = getframe(gcf);
 	for i = 2:N
+    fprintf("Frame %d/%d\n", i, N);
 		set(frame, Position=pos_ds(:, i), Orientation=q_ds(i));
 		drawnow;
 		M(i) = getframe(gcf);

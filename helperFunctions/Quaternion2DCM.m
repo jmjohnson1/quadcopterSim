@@ -19,4 +19,8 @@ function [Cba] = Quaternion2DCM(q_ba)
 epsilon_ba = [q_ba(2);q_ba(3);q_ba(4)];
 eta_ba = q_ba(1);
 
-Cba = (2*eta_ba^2-1)*eye(3) + 2*(epsilon_ba*epsilon_ba') - 2*eta_ba*crossm(epsilon_ba);
+% Cba = (2*eta_ba^2-1)*eye(3) + 2*(epsilon_ba*epsilon_ba') - 2*eta_ba*crossm(epsilon_ba);
+Cba = (2*eta_ba^2-1)*eye(3) + 2*(epsilon_ba*epsilon_ba') - ...
+       2*eta_ba*[0, -epsilon_ba(3), epsilon_ba(2); 
+                 epsilon_ba(3), 0, -epsilon_ba(1); 
+                 -epsilon_ba(2), epsilon_ba(1), 0];

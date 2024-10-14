@@ -11,9 +11,10 @@ colors = [0.1974    0.5129    0.7403;
 defaultColor = colors(1, :);
 setpointColor = colors(2, :);
 estimateColor = colors(3, :);
+
 %%%%%%%%%%%%
 % Position
-figure(Name="Position")
+figure(Name="Position", WindowStyle='docked')
 labels = ["x (m)", "y (m)", "z (m)"];
 for i = 1:3
   axPos(i) = subplot(3, 1, i);
@@ -44,7 +45,7 @@ grid(axPos, 'on');
 legend(axPos(1));
 
 % Velocity
-figure(Name="Velocity");
+figure(Name="Velocity", WindowStyle='docked');
 labels = ["V_x (m/s)", "V_y (m/s)", "V_z (m/s)"];
 for i = 1:3
 axVel(i) = subplot(3, 1, i);
@@ -74,7 +75,7 @@ xlabel("Time (s)");
 legend(axVel(1));
 
 % Attitude
-figure(Name="Attitude")
+figure(Name="Attitude", WindowStyle='docked')
 labels = ["Roll (deg)", "Pitch (deg)", "Yaw (deg)"];
 for i = 1:3
 	axAtt(i) = subplot(3, 1, i);
@@ -107,7 +108,7 @@ grid(axAtt, 'on');
 legend(axAtt(1));
 
 % Angular rates
-figure(Name="Angular Rates");
+figure(Name="Angular Rates", WindowStyle='docked');
 labels = {'P (deg/s)', 'Q (deg/s)', 'R (deg/s)'};
 for i = 1:3
 axGyro(i) = subplot(3, 1, i);
@@ -132,7 +133,7 @@ legend(axGyro(3));
 
 
 % Motor angular rates
-figure(Name="Motors");
+figure(Name="Motors", WindowStyle='docked');
 for i = 1:4
   axMot(i) = subplot(2, 2, i);
   plot(tFc, setpoints.rotRate(i, :), ...
@@ -154,7 +155,7 @@ grid(axMot, 'on');
 legend(axMot(2));
 
 % Thrust setpoints
-figure(Name="thrust");
+figure(Name="thrust", WindowStyle='docked');
 plot(tSim, thrust, ...
           Color=defaultColor, ...
           DisplayName="Truth", ...
@@ -177,7 +178,7 @@ legend();
 xLimits = [-6.2197, 2.165];
 yLimits = [-0.8, 2.6975];
 zLimits = [-2.5, 0.2];
-f = figure(Name="3D Trajectory");
+f = figure(Name="3D Trajectory", WindowStyle='docked');
 
 ax = gca;
 plot3(traj(1, :), traj(2, :), traj(3, :), ...
@@ -209,7 +210,7 @@ clear f;
 % Additional plots for when EKF is enabled
 if opt.useEKF == true
 	% Plot accelerometer measurements
-	figure(Name="Accelerometer")
+	figure(Name="Accelerometer", WindowStyle='docked')
 	for i = 1:3
 		s(i) = subplot(3, 1, i);
 		plot(tSim, accelTruth(i, :), LineWidth=lw, DisplayName="Truth", LineStyle=defaultLS, Color=defaultColor);
@@ -222,7 +223,7 @@ if opt.useEKF == true
 	legend(s(1))
 
 	% Plot gyro measurements
-	figure(Name="Gyro")
+	figure(Name="Gyro", WindowStyle='docked')
 	for i = 1:3
 		s(i) = subplot(3, 1, i);
 		plot(tSim, gyroTruth(i, :), LineWidth=lw, DisplayName="Truth", LineStyle=defaultLS, Color=defaultColor);
@@ -235,7 +236,7 @@ if opt.useEKF == true
 	legend(s(1))
 
 	% Plot accelerometer bias	
-	figure(Name="Accelerometer bias")
+	figure(Name="Accelerometer bias", WindowStyle='docked')
 	for i = 1:3
 		s(i) = subplot(3, 1, i);
 		plot(tSim, accelBiasTruth(i, :), LineWidth=lw, DisplayName="Truth", LineStyle=defaultLS, Color=defaultColor);
@@ -248,16 +249,15 @@ if opt.useEKF == true
 	legend(s(1))
 
 	% Plot gyro bias	
-	figure(Name="Gyro bias")
+	figure(Name="Gyro bias", WindowStyle='docked')
 	for i = 1:3
 		s(i) = subplot(3, 1, i);
 		plot(tSim, gyroBiasTruth(i, :), LineWidth=lw, DisplayName="Truth", LineStyle=defaultLS, Color=defaultColor);
 		hold on
 		plot(tSim, gyroBiasEstimate(i, :), LineStyle=estimateLS, LineWidth=lw, Color=estimateColor, DisplayName="Estimate")
 		hold off
-		ylabel(['b_{a', num2str(i), '} (m/s^2)']);
+		ylabel(['b_{g', num2str(i), '} (m/s^2)']);
 	end
 	xlabel(s(3), 'time (s)')
 	legend(s(1))
-
 end

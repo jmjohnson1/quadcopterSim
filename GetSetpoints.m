@@ -2,9 +2,9 @@ function [positionSp, velocitySp, flightVar] = GetSetpoints(t, s, traj,...
 																						doTakeoff, doLanding, flightVar)
 
 
-	takeoffAlt = 0.75;
+	takeoffAlt = 0.25;
 	k = 0;
-	waypointArrivedThresh = 0.05;
+	waypointArrivedThresh = 0.2;
 
 	if doTakeoff == false && strcmp(flightVar.mode, 'takeoff')
 		flightVar.mode = "mission";

@@ -6,30 +6,33 @@ addpath('./EKF/');
 %%%%%%%%%%%
 % Options %
 %%%%%%%%%%%
+opt.makeAnimation = true;
 opt.useEKF = true;
 opt.makePlots = true;
 opt.debugEKFFiles = false;
 
+
 % Time options
 tStart = 0;  % Simulation end time [sec]
-tEnd = 60;  % Simulation start time [sec]
+tEnd = 45;  % Simulation start time [sec]
 looprateFC = 200;  % Flight controller loop rate [Hz]
-numSnapshots = 2;  % Number of states to save between each FC update
+numSnapshots = 1;  % Number of states to save between each FC update
 
 % Define how often measurements are passed into the EKF
 measUpdateRate = 5 ;  % Hz
+
 
 %%%%%%%%%%%%%%%%%%%%%
 % Trajectory Import %
 %%%%%%%%%%%%%%%%%%%%%
 % Run a trajectory generation function. It must return a trajectory with this format:
-%   [x0 x1 ... 
-%    y0 y1 ...
-%    z0 z1 ...
-%    u0 u1 ...
-%    v0 v1 ...
-%    w0 w1 ...
-%    t0 t1 ...]
+%   [x0 x1 ... xn 
+%    y0 y1 ... yn
+%    z0 z1 ... zn
+%    u0 u1 ... un
+%    v0 v1 ... vn
+%    w0 w1 ... wn
+%    t0 t1 ... tn]
 % (x, y, z) are the waypoint position in the local North-East-Down frame [m].
 % (u, v, w) are the velocities to target while passing through the waypoint (NED) [m/s].
 % t is the time when the quad should be passing through the waypoint [seconds]
@@ -50,8 +53,9 @@ measUpdateRate = 5 ;  % Hz
 %              0.00,  0.00,  -0.75]';
 % waypoints = [waypoints; t_wp];
 % traj = GenerateTrajectory(waypoints, trajType, false); % Import trajectory
-
-traj = MakeStep([-0.5 -1.0 -1.5 -1.0], [0 6 12 18]);
+stepZ = [-0.5 -1.0 -1.5 -1.0 -0.5];
+tZ = [0 6 12 18 24];
+traj = MakeStep(stepZ, tZ);
 
 try
   constants;
@@ -74,7 +78,7 @@ try
   %%%%%%%%%%%%%%%%%%%%%%%%
   initPosition = [0, 0, 0]';  % initial position in local NED frame [m]
   initVelocity = [0, 0, 0]';  % initial velocity in local NED frame [m/s]
-  initAttitude = [0, 0, 180]'*deg2rad;  % initial roll, pitch, yaw [rad]
+  initAttitude = [2, 3, 145]'*deg2rad;  % initial roll, pitch, yaw [rad]
   initRates = [0, 0, 0]';  % Initial angular rates in body frame [rad/s]
 
   % Initial motor rates
@@ -109,7 +113,7 @@ try
 	gyroBiasTruth = zeros(3, numPoints);
 
   ctrl = controller; % Create controller object
-  options = odeset('AbsTol',1e-11,'RelTol',1e-11); % Set integration tolerences
+  options = odeset('AbsTol',1e-8,'RelTol',1e-8); % Set integration tolerences
 
   % Initial state vector and memory allocation
   s0 = [initPosition; initq_bn; initVelocity; initRates; initW];
@@ -121,8 +125,6 @@ try
   sEstimate = zeros(13, numPoints);
   sEstimate(:, 1) = s0(1:13);
   measUpdatePrev = 0;
-
-  windVel = randn(numPoints, 1)*3;
 
   % This will track where to access and save states in the sim
   sIndex = 1;  
@@ -136,6 +138,12 @@ try
   setpoints.euler = zeros(3, numUpdates);
   setpoints.rotRate = zeros(4, numUpdates);
   setpoints.thrust = zeros(1, numUpdates);
+
+  % Generate wind for full sim
+  dist_u = wind(tSim, const.da_u, const.db_u, const.velDistMax);
+  dist_v = wind(tSim, const.da_v, const.db_v, const.velDistMax);
+  dist_w = wind(tSim, const.da_w, const.db_w, const.velDistMax);
+  dist_uvw = [dist_u; dist_v; dist_w];
 
   % DEBUG: To pass into the C++ version of the EKF
   if opt.debugEKFFiles == true
@@ -163,7 +171,8 @@ try
 
     % Controller update
     [sp.position, sp.velocity, flightVar] = GetSetpoints(tSim(sIndex), sEstimate(:, sIndex), traj, true, true, flightVar);
-    [rotRate, sp, pid] = ctrl.update(sEstimate(:, sIndex), sp, const, dt_flightControl);
+    % [rotRate, sp, pid] = ctrl.update(sEstimate(:, sIndex), sp, const, dt_flightControl);
+    [rotRate, sp, pid] = ctrl.update(sEstimate(:, sIndex), sp, const, dt_sim);
 
     % Save the setpoints for plotting later
     setpoints.position(:, LV1) = sp.position;
@@ -176,23 +185,23 @@ try
     % This loop runs the simulation and saves points between flight controller updates.
     for LV2 = 1:numSnapshots
       
-      [t_temp, s_temp] = ode45(@(t, s)ODEs(t, s, rotRate, const, windVel(sIndex)), [0, dt_sim], s(:, sIndex), options);
+      [t_temp, s_temp] = ode45(@(t, s)ODEs(t, s, rotRate, const, dist_uvw(:, sIndex)), [0, dt_sim], s(:, sIndex), options);
       s(:, sIndex + 1) = s_temp(end, :);
       
       if opt.useEKF == true
         % For generating sensor measurements, calculate the state derivative at the current time
-        ds = ODEs(0, s(:, sIndex), rotRate, const);
-        ds_ = ODEs(0, s(:, sIndex+1), rotRate, const);
+        ds = ODEs(0, s(:, sIndex), rotRate, const, dist_uvw(:, sIndex));
+        % ds_ = ODEs(0, s(:, sIndex+1), rotRate, const, windVel(:, sIndex+1));
         % Take the acceleration, put it in the body frame, add gravity, add noise
         accelTruth(:, sIndex) = Quaternion2DCM(s(4:7, sIndex))*(ds(8:10) - [0;0;const.g]);
         % accelMeas(:, sIndex) = accelTruth(:, sIndex);
-        accelMeas(:, sIndex) = accelTriad.GetMeasurement(accelTruth(:, sIndex), dt_sim);
-				accelBiasTruth(:, sIndex) = accelTriad.inRunBias;
+        accelMeas(:, sIndex) = accelTriad.GetMeasurement(accelTruth(:, sIndex), dt_sim) + const.ba0;
+				accelBiasTruth(:, sIndex) = accelTriad.inRunBias + const.ba0;
         % Take the body rotation rates, add noise
         gyroTruth(:, sIndex) = s(11:13, sIndex);
         % gyroMeas(:, sIndex) = gyroTruth(:, sIndex);
-        gyroMeas(:, sIndex) = gyroTriad.GetMeasurement(gyroTruth(:, sIndex), dt_sim);
-				gyroBiasTruth(:, sIndex) = gyroTriad.inRunBias;
+        gyroMeas(:, sIndex) = gyroTriad.GetMeasurement(gyroTruth(:, sIndex), dt_sim) + const.bg0;
+	      gyroBiasTruth(:, sIndex) = gyroTriad.inRunBias + const.bg0;
 
         % Determine availability of position measurement
         if tSim(sIndex+1) - measUpdatePrev > 1/measUpdateRate
@@ -247,7 +256,9 @@ try
   if displayPositionViolation == true
     positionMessage = msgbox("Maximum horizontal error exceeded (probably due to aggressive gains)! Adjust your gains!");
   end
-
+  if opt.makeAnimation == true
+    animateQuad(s(1:3), s(4:7), tSim, [stepZ*0; stepZ*0; stepZ], traj, 20);
+  end
   save simData;
 
 catch ME

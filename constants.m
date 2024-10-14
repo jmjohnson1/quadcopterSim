@@ -1,7 +1,9 @@
 %%% SET PID GAINS HERE %%%
-Kp_z = 50;
-Ki_z = 10;
-Kd_z = 11;
+Kp_z = 9;
+Ki_z = 4;
+Kd_z = 7;
+
+
 
 % Configurations:
 bat_3s_3300mAh = false;
@@ -93,7 +95,17 @@ const.mixerCoefficientsInv = inv(const.mixerCoefficients);
 clear kt km dymf dymb dxmf dxmb;
 
 % Drag force (Not used, because ...)
-const.Cd = 0.05;  % Drag coefficient
+const.Cd = 0;  % Drag coefficient
+
+% Velocity disturbance coefficients
+const.velDistMax = 0.1; % Maximum velocity disturbance [m/s]
+const.da_u = [1, 0.5, 0.2382];
+const.db_u = [0.1, 0.2, -0.6];
+const.da_v = [0.13, 0.7043, 0.2382];
+const.db_v = [0.1, -0.1, -0.6];
+const.da_w = [1, 1, 1];
+const.db_w = [1, 1, 1];
+
 
 
 % Controller gains
@@ -106,9 +118,13 @@ const.Ki_att = diag([0.5, 0.5, 0.0]);
 const.Kd_att = diag([0.34, 0.34, 0.1]);
 
 % Position
-const.Kp_pos = diag([6  6, Kp_z]);
-const.Ki_pos = diag([1,  1,  Ki_z]);
-const.Kd_pos = diag([4,  4, Kd_z]);
+Kp_xy = 3.5;
+Ki_xy = 1.0;
+Kd_xy = 4.0;
+const.Kp_pos = diag([Kp_xy, Kp_xy, Kp_z]);
+const.Ki_pos = diag([Ki_xy, Ki_xy,  Ki_z]);
+const.Kd_pos = diag([Kd_xy, Kd_xy, Kd_z]);
+
 
 const.k_x = 13;
 const.k_v = 5.5*2;
@@ -136,6 +152,9 @@ const.iMax_att = 10;  % For attitude controller
 % Number of states
 N = 15;
 
+const.ba0 = [0.01; 0.005; -0.01];
+const.bg0 = [0.0001; 0.0; -0.0001];
+
 % Accel/gyro model values
 % GM time constant
 const.tau_a = [400 400 400]';
@@ -144,8 +163,10 @@ const.tau_g = [300 300 300]';
 const.sigma_acc_gm = [0.018 0.018 0.018]';
 const.sigma_gyro_gm = [4E-4 4E-4 4E-4]';
 % White noise
-const.sigma_acc = [0.04 0.03 0.05]';
-const.sigma_gyro = [0.0015 0.0015 0.0014]';
+% const.sigma_acc = [0.04 0.03 0.05]';
+% const.sigma_gyro = [0.0015 0.0015 0.0014]';
+const.sigma_acc = [0.004 0.003 0.005]';
+const.sigma_gyro = [0.00015 0.00015 0.00014]';
 
 % Inital conditions
 const.sigma_initial_pos = 1*ones(3,1);
@@ -174,5 +195,5 @@ const.H = zeros(3, N);
 const.H(1:3,1:3) = eye(3);
 
 % Measurement noise covariance
-const.sigma_pos = [0.05 0.05 0.05]';
+const.sigma_pos = [0.01 0.01 0.01]';
 const.R = diag( const.sigma_pos.^2 );
