@@ -6,10 +6,18 @@ addpath('./EKF/');
 %%%%%%%%%%%
 % Options %
 %%%%%%%%%%%
-opt.makeAnimation = false;
+opt.makeAnimation = true;
 opt.useEKF = true;
 opt.makePlots = true;
 opt.debugEKFFiles = false;
+opt.makeEKFPlots = false;
+opt.plotVelocity = true;
+opt.plotPosition = true;
+opt.plotAttitude = true;
+opt.plotMotorRates = true;
+opt.plotBodyRates = true;
+opt.plotThrust = true;
+opt.plot3dTraj = true;
 
 
 % Time options
@@ -251,13 +259,14 @@ try
   
   if displayThrustViolation == true
     rotRateMessage = msgbox("Maximum thrust input exceeded! Adjust your gains!");
-		set(rotRateMessage, 'WIndowStyle', 'modal');
+		set(rotRateMessage, 'WindowStyle', 'modal');
   end
   if displayPositionViolation == true
     positionMessage = msgbox("Maximum horizontal error exceeded (probably due to aggressive gains)! Adjust your gains!");
+		set(positionMessage, 'WindowStyle', 'modal');
   end
   if opt.makeAnimation == true
-    animateQuad(s(1:3), s(4:7), tSim, [stepZ*0; stepZ*0; stepZ], traj, 20);
+    animateQuad(s(1:3, :), s(4:7, :), tSim, [stepZ*0; stepZ*0; stepZ; tZ], traj, 10);
   end
   save simData;
 
