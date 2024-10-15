@@ -17,13 +17,14 @@ for LV1 = 1:numPoints
 end
 
 % Check for violations
-maxHorizontalError = 1.0;
+maxHorizontalError = 0.75;
 maxRotRate = 1400;
+maxAllowableThrust = 33.0;
 
-displayRotRateViolation = false;
+displayThrustViolation = false;
 displayPositionViolation = false;
-if any(motorRotRate > maxRotRate, 'all')
-  displayRotRateViolation = true;
+if any(setpoints.thrust > maxAllowableThrust)
+  displayThrustViolation = true;
 end
 if any(abs(position(1:2, :)) > maxHorizontalError, 'all')
   displayPostionViolation = true;

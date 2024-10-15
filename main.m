@@ -6,7 +6,7 @@ addpath('./EKF/');
 %%%%%%%%%%%
 % Options %
 %%%%%%%%%%%
-opt.makeAnimation = true;
+opt.makeAnimation = false;
 opt.useEKF = true;
 opt.makePlots = true;
 opt.debugEKFFiles = false;
@@ -78,8 +78,8 @@ try
   %%%%%%%%%%%%%%%%%%%%%%%%
   initPosition = [0, 0, 0]';  % initial position in local NED frame [m]
   initVelocity = [0, 0, 0]';  % initial velocity in local NED frame [m/s]
-  initAttitude = [2, 3, 145]'*deg2rad;  % initial roll, pitch, yaw [rad]
-  initRates = [0, 0, 0]';  % Initial angular rates in body frame [rad/s]
+  initAttitude = [2, -6, 145]'*deg2rad;  % initial roll, pitch, yaw [rad]
+  initRates = [0.1, -0.2, 0]';  % Initial angular rates in body frame [rad/s]
 
   % Initial motor rates
   hoverThrust = const.mB_ctrl*9.81/4*[1, 1, 1, 1]';
@@ -244,14 +244,14 @@ try
   disp("Post processing...")
   postprocessing;
 
-
   if opt.makePlots == true
     disp("Plotting...")
     plotscript;
   end
   
-  if displayRotRateViolation == true
-    rotRateMessage = msgbox("Maximum control input exceeded! Adjust your gains!");
+  if displayThrustViolation == true
+    rotRateMessage = msgbox("Maximum thrust input exceeded! Adjust your gains!");
+		set(rotRateMessage, 'WIndowStyle', 'modal');
   end
   if displayPositionViolation == true
     positionMessage = msgbox("Maximum horizontal error exceeded (probably due to aggressive gains)! Adjust your gains!");

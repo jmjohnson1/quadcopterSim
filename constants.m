@@ -1,7 +1,7 @@
 %%% SET PID GAINS HERE %%%
-Kp_z = 9;
-Ki_z = 4;
-Kd_z = 7;
+Kp_z = 0;
+Ki_z = 0;
+Kd_z = 0;
 
 
 
@@ -28,7 +28,7 @@ const.dymb = 0.11383;  % y distance to rear motors [m]
 const.dzm = 0.021;  % z distance to motors [m]
 
 % const.mB = 0.842;  % Quad mass (3s 3300mAh) [kg]
-const.mB = 1.2;  % Quad mass (4s 5200mAh) [kg]
+const.mB = 1.3;  % Quad mass (4s 5200mAh) [kg]
 const.mB_ctrl = 1.2;  % Quad mass used in controller [kg]
 
 % Inertia matrix [kg*m^2]

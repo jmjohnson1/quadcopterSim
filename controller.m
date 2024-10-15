@@ -85,9 +85,9 @@ classdef controller < handle
       Kp = const.Kp_pos; Ki = const.Ki_pos; Kd = const.Kd_pos;
       % The output of the PID controller is the desired acceleration in the
       % local NED frame
-
-      derivTerm = obj.filterprev*(1 - obj.alpha) + Kd*derivative*obj.alpha;
-      obj.filterprev = derivTerm;
+      % derivTerm = obj.filterprev*(1 - obj.alpha) + Kd*derivative*obj.alpha;
+      % obj.filterprev = derivTerm;
+			derivTerm = Kd*derivative;
       desAcc_n = Kp*error + derivTerm + Ki*integral;
 
       % Now we decouple this acceleration and calculate the projection of the n3
