@@ -6,7 +6,10 @@ addpath('./EKF/');
 %%%%%%%%%%%
 % Options %
 %%%%%%%%%%%
-opt.makeAnimation = true;
+opt.makeAnimation = false;
+
+
+
 opt.useEKF = true;
 opt.makePlots = true;
 opt.debugEKFFiles = false;
@@ -262,7 +265,7 @@ try
 		set(rotRateMessage, 'WindowStyle', 'modal');
   end
   if displayPositionViolation == true
-    positionMessage = msgbox("Maximum horizontal error exceeded (probably due to aggressive gains)! Adjust your gains!");
+    positionMessage = msgbox("Maximum horizontal deviation or vertical position exceeded! Adjust your gains!");
 		set(positionMessage, 'WindowStyle', 'modal');
   end
   if opt.makeAnimation == true

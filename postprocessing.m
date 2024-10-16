@@ -18,6 +18,7 @@ end
 
 % Check for violations
 maxHorizontalError = 0.75;
+maxVerticalPosition = 2.0;
 maxRotRate = 1400;
 maxAllowableThrust = 33.0;
 
@@ -26,6 +27,6 @@ displayPositionViolation = false;
 if any(setpoints.thrust > maxAllowableThrust)
   displayThrustViolation = true;
 end
-if any(abs(position(1:2, :)) > maxHorizontalError, 'all')
+if any(abs(position(1:2, :)) > maxHorizontalError, 'all') || any(abs(position(3, :)) > maxVerticalPosition, 'all')
   displayPostionViolation = true;
 end

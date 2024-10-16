@@ -1,5 +1,6 @@
 function animateQuad(pos, quat, time, waypoints, trajectory, fps)
 
+  tic
 	% Downsample
 	timeStep = 1/fps;
 	dsIndex = [];
@@ -25,9 +26,12 @@ function animateQuad(pos, quat, time, waypoints, trajectory, fps)
 	open(vid);
 
 	hFig = figure(Name="Animation");
-	hFig.Position = [10 10, 500 500];
+	hFig.Position = [10 10, 300 500];
 	hFig.Visible = 'off';
-	frame = poseplot(q_ds(1), pos_ds(:, 1), MeshFileName="quadmesh.stl");
+  % The quadmesh.stl model slows things down too much
+	% frame = poseplot(q_ds(1), pos_ds(:, 1), MeshFileName="quadmesh.stl");
+  frame = poseplot(q_ds(1), pos_ds(:, 1), ScaleFactor=0.1);
+
 	ax = gca;
 	hold on
 	plot3(trajectory(1, :), trajectory(2, :), trajectory(3, :));
@@ -35,6 +39,9 @@ function animateQuad(pos, quat, time, waypoints, trajectory, fps)
 	hold off
 	set(ax, "XLim", xLimits, "YLim", yLimits, "ZLim", zLimits);
 	axis equal;
+  xlabel("N [m]");
+  ylabel("E [m]");
+  zlabel("D [m]");
   M = struct('cdata', cell(1,N), 'colormap', cell(1,N));
 	M(1) = getframe(gcf);
 	for i = 2:N
@@ -48,4 +55,5 @@ function animateQuad(pos, quat, time, waypoints, trajectory, fps)
 	writeVideo(vid, M);
 	close(vid);
 	disp("Video saved")
+  toc
 end
