@@ -43,12 +43,12 @@ function animateQuad(pos, quat, time, waypoints, trajectory, fps)
   ylabel("E [m]");
   zlabel("D [m]");
   M = struct('cdata', cell(1,N), 'colormap', cell(1,N));
-	M(1) = getframe(gcf);
+	M(1) = getframe(hFig);
 	for i = 2:N
     fprintf("Frame %d/%d\n", i, N);
 		set(frame, Position=pos_ds(:, i), Orientation=q_ds(i));
 		drawnow;
-		M(i) = getframe(gcf);
+		M(i) = getframe(hFig);
 	end
 	
 	disp("Saving video...");

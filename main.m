@@ -183,7 +183,7 @@ try
     % Controller update
     [sp.position, sp.velocity, flightVar] = GetSetpoints(tSim(sIndex), sEstimate(:, sIndex), traj, true, true, flightVar);
     % [rotRate, sp, pid] = ctrl.update(sEstimate(:, sIndex), sp, const, dt_flightControl);
-    [rotRate, sp, pid] = ctrl.update(sEstimate(:, sIndex), sp, const, dt_sim);
+    [rotRate, sp, pid] = ctrl.update(sEstimate(:, sIndex), sp, const, 1/2000);
 
     % Save the setpoints for plotting later
     setpoints.position(:, LV1) = sp.position;

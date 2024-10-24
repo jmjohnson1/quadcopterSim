@@ -1,7 +1,7 @@
 %%% SET PID GAINS HERE %%%
-Kp_z = 0;
-Ki_z = 0;
-Kd_z = 0;
+Kp_z = 15;
+Ki_z = 5;
+Kd_z = 10;
 
 
 
@@ -77,7 +77,7 @@ end
 
 
 % Motor dynamics (modeled as 1st order system)
-const.tauM = 0.015;  % Time constant [s]
+const.tauM = 0.015*5;  % Time constant [s]
 
 % Control mixer coefficient matrix
 kt = const.kt;
@@ -111,18 +111,18 @@ const.db_w = [1, 1, 1];
 % Controller gains
 % Attitude
 % const.Kp_att = diag([1.66, 1.66, 0.11]);
-% const.Ki_att = diag([4.81, 4.81, 0.00]);
-% const.Kd_att = diag([0.34, 0.34, 0.00]);
-const.Kp_att = diag([1.66, 1.66, 0.11]);
-const.Ki_att = diag([0.5, 0.5, 0.0]);
-const.Kd_att = diag([0.34, 0.34, 0.1]);
+% const.Ki_att = diag([0.20, 0.20, 0.00]);
+% const.Kd_att = diag([0.34, 0.34, 0.10]);
+const.Kp_att = diag([0.85, 0.85, 0.11]);
+const.Ki_att = diag([0.20, 0.20, 0.00]);
+const.Kd_att = diag([0.16, 0.16, 0.10]);
 
 % Position
 Kp_xy = 3.5;
 Ki_xy = 1.0;
 Kd_xy = 4.0;
 const.Kp_pos = diag([Kp_xy, Kp_xy, Kp_z]);
-const.Ki_pos = diag([Ki_xy, Ki_xy,  Ki_z]);
+const.Ki_pos = diag([Ki_xy, Ki_xy, Ki_z]);
 const.Kd_pos = diag([Kd_xy, Kd_xy, Kd_z]);
 
 
