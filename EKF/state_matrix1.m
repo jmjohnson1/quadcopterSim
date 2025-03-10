@@ -5,6 +5,8 @@ function [Fc, Gc]=state_matrix1(q,u, Ts, const)
   O=zeros(3);
   I=eye(3);
 
+  C_bn = Quaternion2DCM(q);
+
   % Position derivatives
   dp_p = O;
   dp_v = I;
