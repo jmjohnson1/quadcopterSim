@@ -1,7 +1,7 @@
 %%% SET PID GAINS HERE %%%
-Kp_z = 15;
+Kp_z = 20;
 Ki_z = 3;
-Kd_z = 15;
+Kd_z = 10;
 
 
 
@@ -28,8 +28,8 @@ const.dymb = 0.11383;  % y distance to rear motors [m]
 const.dzm = 0.021;  % z distance to motors [m]
 
 % const.mB = 0.842;  % Quad mass (3s 3300mAh) [kg]
-const.mB = 1.3;  % Quad mass (4s 5200mAh) [kg]
-const.mB_ctrl = 1.2;  % Quad mass used in controller [kg]
+const.mB = 1.5;  % Quad mass (4s 5200mAh) [kg]
+const.mB_ctrl = 1.5;  % Quad mass used in controller [kg]
 
 % Inertia matrix [kg*m^2]
 
@@ -56,9 +56,10 @@ const.Ib_inv = inv(const.Ib);
 const.Irzz = 1.5e-5;  
 
 % Motor constants
-const.kt = 4.8e-6;  % thrust coefficient [N/(rad/s)^2]
+% const.kt = 4.8e-6;  % thrust coefficient [N/(rad/s)^2]
+const.kt = 3.6e-6;  % thrust coefficient [N/(rad/s)^2]
 % Approximate moment coefficient [Nm/(rad/s)^2]
-const.km = 7.7e-8;
+const.km = 7.6e-8;
 const.minThrust = 1.0;  % Minimum total thrust [N]
 const.minW = 277;  % minimum motor rotation speed [rad/s]
 
