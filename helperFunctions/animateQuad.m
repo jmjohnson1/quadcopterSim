@@ -21,7 +21,7 @@ function animateQuad(pos, quat, time, waypoints, trajectory, fps)
 	zLimits = [-2.5, 0.2];
 
 	disp("Generating video...");
-	vid = VideoWriter("movie.avi");
+	vid = VideoWriter("movie.mp4");
 	set(vid, "FrameRate", fps);
 	open(vid);
 

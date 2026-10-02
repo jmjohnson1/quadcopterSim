@@ -35,6 +35,7 @@ classdef controller < handle
 			motorCommands = ControlAllocator(obj, [ref.thrust; PIDOutput], const);
     end
 		function [PIDOutput] = attitudePID(obj, s, attDes, const, Ts)
+      Kp = const.Kp_att; Ki = const.Ki_att; Kd = const.Kd_att;
       % Note that this controls the rate for yaw and angle for pitch/roll
       attEuler = DCM2Euler321(obj.C_ba);
       error = attDes - attEuler;
@@ -51,11 +52,10 @@ classdef controller < handle
       derivative(1:2, 1) = -w(1:2);  % Approximation of the derivative term for pitch and roll. Assumes small changes in reference and prevents kick.
       % derivative(3, 1) = (error(3) - obj.errorPrev_attitude(3))/Ts;  % Simple approximation of yaw rate derivative
       derivative(3, 1) = -w(3);
-      integral = obj.integralPrev_attitude + error*Ts;
+      integral = obj.integralPrev_attitude + Ki*error*Ts; % MULTIPLIED BY KI HERE
       % Prevent integral buildup
       integral = constrain(integral, -const.iMax_att, const.iMax_att);
-      Kp = const.Kp_att; Ki = const.Ki_att; Kd = const.Kd_att;
-      PIDOutput = Kp*error + Kd*derivative + Ki*integral;
+      PIDOutput = Kp*error + Kd*derivative + integral;
       % Store the error and integral terms from the current time step
       obj.integralPrev_attitude = integral;
       obj.errorPrev_attitude = error;
@@ -75,20 +75,21 @@ classdef controller < handle
     end
 
     function [desRoll, desPitch, desThrust] = positionPID(obj, s, sDes, const, Ts)
+      Kp = const.Kp_pos; Ki = const.Ki_pos; Kd = const.Kd_pos;
       error = sDes(1:3) - s(1:3);  % The position error [m]
-      integral = obj.integralPrev_position + error*Ts;
+      integral = obj.integralPrev_position + Ki*error*Ts; % MULTIPLIED BY KI HERE!
       % Prevent integral buildup
       integral = constrain(integral, -const.iMax_pos, const.iMax_pos);
       % The derivative term used is the error between the desired velocity and
       % actual velocity
       derivative = sDes(4:6) - s(8:10);
-      Kp = const.Kp_pos; Ki = const.Ki_pos; Kd = const.Kd_pos;
+      
       % The output of the PID controller is the desired acceleration in the
       % local NED frame
       % derivTerm = obj.filterprev*(1 - obj.alpha) + Kd*derivative*obj.alpha;
       % obj.filterprev = derivTerm;
 			derivTerm = Kd*derivative;
-      desAcc_n = Kp*error + derivTerm + Ki*integral;
+      desAcc_n = Kp*error + derivTerm + integral;
 
       % Now we decouple this acceleration and calculate the projection of the n3
       % component onto the b3 axis

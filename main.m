@@ -57,13 +57,13 @@ measUpdateRate = 5 ;  % Hz
   % waypoints = [];
 
 % trajType = 'minsnap';
-% % t_wp = linspace(0, 20, 6);
-% % waypoints = [0.00,  0.00,  -0.40;
-% %              -2.00,  0.00,  -0.40;
-% %              0.00,  0.1,  -0.40;
-% %              -2.00,  2.00,  -0.40;
-% %              0.00,  2.00, -0.40;
-% %              0.00, 2.00, -0.40]';
+% % % t_wp = linspace(0, 20, 6);
+% % % waypoints = [0.00,  0.00,  -0.40;
+% % %              -2.00,  0.00,  -0.40;
+% % %              0.00,  0.1,  -0.40;
+% % %              -2.00,  2.00,  -0.40;
+% % %              0.00,  2.00, -0.40;
+% % %              0.00, 2.00, -0.40]';
 % t_wp = linspace(0, 20, 23);
 % waypoints = [-0.17101007,    0.0    , -0.46984631;
 %              -0.34202014,    0.25   , -0.93969262;
@@ -88,14 +88,11 @@ measUpdateRate = 5 ;  % Hz
 %              -0.51303021,    0.75   , -1.40953893;
 %              -0.34202014,    0.5    , -0.93969262;
 %              -0.17101007,    0.0    , -0.46984631]';
-
-
-
-
-
-
+%
 % waypoints = [waypoints; t_wp];
-% traj = GenerateTrajectory(waypoints, trajType, false); % Import trajectory
+% traj = GenerateTrajectory(waypoints, trajType, true); % Import trajectory
+
+
 stepZ = [-0.5 -1.0 -1.5 -1.0 -0.5];
 tZ = [0 6 12 18 24];
 traj = MakeStep(stepZ, tZ);
