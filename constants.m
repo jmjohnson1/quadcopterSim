@@ -1,7 +1,7 @@
 %%% SET PID GAINS HERE %%%
-Kp_z = 20;
-Ki_z = 3;
-Kd_z = 10;
+Kp_z = 5;
+Ki_z = 1;
+Kd_z = 5;
 
 
 
@@ -119,9 +119,9 @@ const.Ki_att = diag([0.20, 0.20, 0.00]);
 const.Kd_att = diag([0.16, 0.16, 0.10]);
 
 % Position
-Kp_xy = 4.0*2;
-Ki_xy = 1.0;
-Kd_xy = 6.0*2;
+Kp_xy = 1.50;
+Ki_xy = 0.75;
+Kd_xy = 6.00;
 const.Kp_pos = diag([Kp_xy, Kp_xy, Kp_z]);
 const.Ki_pos = diag([Ki_xy, Ki_xy, Ki_z]);
 const.Kd_pos = diag([Kd_xy, Kd_xy, Kd_z]);

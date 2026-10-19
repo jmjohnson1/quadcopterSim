@@ -20,7 +20,7 @@ end
 maxHorizontalError = 0.75;
 maxVerticalPosition = 2.0;
 maxRotRate = 1400;
-maxAllowableThrust = 33.0;
+maxAllowableThrust = 23.0;
 
 displayThrustViolation = false;
 displayPositionViolation = false;

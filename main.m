@@ -179,7 +179,7 @@ try
   setpoints.rotRate = zeros(4, numUpdates);
   setpoints.thrust = zeros(1, numUpdates);
 
-  % Generate wind for full sim
+  % Generate wind (perturbations) for full sim
   dist_u = wind(tSim, const.da_u, const.db_u, const.velDistMax);
   dist_v = wind(tSim, const.da_v, const.db_v, const.velDistMax);
   dist_w = wind(tSim, const.da_w, const.db_w, const.velDistMax);
